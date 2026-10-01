@@ -1,26 +1,165 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-bg: #0a0f1a;
+  --color-bg-soft: #111827;
+  --color-fg: #f5f5f5;
+  --color-muted: #8a8f9a;
+  --color-accent: #c9a961;
+  --color-accent-hover: #d9bc7a;
+  --color-border: #1f2937;
+
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   HERO GLOW — subtle premium gradient
+   ============================================================ */
+.bg-glow {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201, 169, 97, 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(201, 169, 97, 0.05), transparent 60%);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a3242; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a4458; }
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+/* Fade + rise — used for messages, hero blocks */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade + slide down — used for eyebrow */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade + scale — used for logo */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Fade only — used for view transition */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Pulse ring — used for mic while listening */
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+  70%  { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Gentle glow for accent dot */
+@keyframes accentGlow {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* Typing dots */
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
+
+/* ============================================================
+   ANIMATION UTILITIES
+   ============================================================ */
+.animate-fade-in-up    { animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in-down  { animation: fadeInDown 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in-scale { animation: fadeInScale 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in       { animation: fadeIn 0.4s ease-out both; }
+.animate-pulse-ring    { animation: pulseRing 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-accent-glow   { animation: accentGlow 2s ease-in-out infinite; }
+
+/* Stagger delays — apply with .stagger-N */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.30s; }
+.stagger-7 { animation-delay: 0.35s; }
+
+/* Respect reduced-motion preference — accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   EYEBROW — continuous bouncing wave
+   ============================================================ */
+
+/* Each letter bobs up and down, forever */
+@keyframes letterBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.eyebrow-letter {
+  display: inline-block;
+  animation: letterBounce 1.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Soft pulsing underline */
+@keyframes underlinePulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scaleX(1.05);
+  }
+}
+
+.eyebrow-underline {
+  animation: underlinePulse 3s ease-in-out infinite;
+}
+
+/* Reduced-motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow-letter,
+  .eyebrow-underline {
+    animation: none !important;
+  }
 }
