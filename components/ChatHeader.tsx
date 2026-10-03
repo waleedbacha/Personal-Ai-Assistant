@@ -22,19 +22,26 @@ export function ChatHeader({ isLoading, onNewChat }: Props) {
 
   return (
     <header className="animate-fade-in-down sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-bg/80 px-4 py-3 backdrop-blur-lg sm:px-6">
-      {hasLogo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={persona.logo}
-          alt={persona.name}
-          onError={() => setLogoFailed(true)}
-          className="h-9 w-auto max-w-[140px] object-contain"
-        />
-      ) : (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent ring-1 ring-accent/30">
-          {initials}
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={onNewChat}
+        aria-label="Back to home"
+        className="shrink-0 cursor-pointer transition-opacity duration-200 hover:opacity-80 active:scale-95"
+      >
+        {hasLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={persona.logo}
+            alt={persona.name}
+            onError={() => setLogoFailed(true)}
+            className="h-9 w-auto max-w-[140px] object-contain"
+          />
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent ring-1 ring-accent/30">
+            {initials}
+          </div>
+        )}
+      </button>
 
       <div className="min-w-0 flex-1">
         {!hasLogo && (

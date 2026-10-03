@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { persona } from '@/data/persona';
-import { ChatInput } from './ChatInput';
-import { SuggestionChips } from './SuggestionChips';
+import { useState } from "react";
+import { persona } from "@/data/persona";
+import { ChatInput } from "./ChatInput";
+import { SuggestionChips } from "./SuggestionChips";
 
 type Props = {
   onSend: (text: string) => void;
@@ -29,46 +29,49 @@ export function Hero({
   const [logoFailed, setLogoFailed] = useState(false);
 
   const initials = persona.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
     .slice(0, 2)
     .toUpperCase();
 
   const hasLogo = Boolean(persona.logo) && !logoFailed;
-  const eyebrowColor = persona.eyebrowColor || '#3b82f6';
-  const eyebrowText = persona.eyebrow || '';
+  const eyebrowColor = persona.eyebrowColor || "#3b82f6";
+  const eyebrowText = persona.eyebrow || "";
 
   return (
     <div className="bg-glow flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
       <div className="w-full max-w-3xl text-center">
-{/* ============ ANIMATED EYEBROW ============ */}
-<div className="mb-6 flex flex-col items-center" aria-label={eyebrowText}>
-  <h2
-    className="text-xs font-semibold uppercase tracking-[0.35em] sm:text-sm"
-    style={{ color: eyebrowColor }}
-  >
-    {eyebrowText.split('').map((char, i) => (
-      <span
-        key={`${char}-${i}`}
-        className="eyebrow-letter"
-        style={{
-          // Negative delay = starts mid-cycle, so it looks like
-          // a wave already rolling, not a synchronized start.
-          animationDelay: `${-(i * 0.08)}s`,
-        }}
-      >
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ))}
-  </h2>
+        {/* ============ ANIMATED EYEBROW ============ */}
+        <div
+          className="mb-6 flex flex-col items-center"
+          aria-label={eyebrowText}
+        >
+          <h2
+            className="text-xs font-semibold uppercase tracking-[0.35em] sm:text-sm"
+            style={{ color: eyebrowColor }}
+          >
+            {eyebrowText.split("").map((char, i) => (
+              <span
+                key={`${char}-${i}`}
+                className="eyebrow-letter"
+                style={{
+                  // Negative delay = starts mid-cycle, so it looks like
+                  // a wave already rolling, not a synchronized start.
+                  animationDelay: `${-(i * 0.08)}s`,
+                }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </span>
+            ))}
+          </h2>
 
-  <span
-    className="eyebrow-underline mt-3 block h-[2px] w-16 rounded-full sm:w-24"
-    style={{ backgroundColor: eyebrowColor }}
-  />
-</div>
-{/* ============ END EYEBROW ============ */}
+          <span
+            className="eyebrow-underline mt-3 block h-[2px] w-16 rounded-full sm:w-24"
+            style={{ backgroundColor: eyebrowColor }}
+          />
+        </div>
+        {/* ============ END EYEBROW ============ */}
 
         {/* Logo */}
         <div className="animate-fade-in-scale stagger-1 flex justify-center">
@@ -118,7 +121,7 @@ export function Hero({
 
         {/* Footer hint */}
         <p className="animate-fade-in stagger-6 mt-12 text-xs text-muted/60">
-          Powered by AI · {persona.role}
+          Powered by WB · {persona.role}
         </p>
       </div>
 
