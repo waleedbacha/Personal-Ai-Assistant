@@ -22,7 +22,11 @@ body {
 body {
   background: var(--color-bg);
   color: var(--color-fg);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-sans),
+    system-ui,
+    -apple-system,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -31,17 +35,35 @@ body {
    ============================================================ */
 .bg-glow {
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201, 169, 97, 0.08), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(201, 169, 97, 0.05), transparent 60%);
+    radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      rgba(201, 169, 97, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 50% 100%,
+      rgba(201, 169, 97, 0.05),
+      transparent 60%
+    );
 }
 
 /* ============================================================
    SCROLLBAR
    ============================================================ */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a3242; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3a4458; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3242;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4458;
+}
 
 /* ============================================================
    KEYFRAMES
@@ -49,65 +71,132 @@ body {
 
 /* Fade + rise — used for messages, hero blocks */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Fade + slide down — used for eyebrow */
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Fade + scale — used for logo */
 @keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Fade only — used for view transition */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Pulse ring — used for mic while listening */
 @keyframes pulseRing {
-  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
-  70%  { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 /* Gentle glow for accent dot */
 @keyframes accentGlow {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Typing dots */
 @keyframes dotPulse {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40%           { opacity: 1;   transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ============================================================
    ANIMATION UTILITIES
    ============================================================ */
-.animate-fade-in-up    { animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-in-down  { animation: fadeInDown 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-in-scale { animation: fadeInScale 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-in       { animation: fadeIn 0.4s ease-out both; }
-.animate-pulse-ring    { animation: pulseRing 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-.animate-accent-glow   { animation: accentGlow 2s ease-in-out infinite; }
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade-in-down {
+  animation: fadeInDown 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade-in-scale {
+  animation: fadeInScale 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+.animate-pulse-ring {
+  animation: pulseRing 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.animate-accent-glow {
+  animation: accentGlow 2s ease-in-out infinite;
+}
 
 /* Stagger delays — apply with .stagger-N */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.10s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.20s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.30s; }
-.stagger-7 { animation-delay: 0.35s; }
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+.stagger-4 {
+  animation-delay: 0.2s;
+}
+.stagger-5 {
+  animation-delay: 0.25s;
+}
+.stagger-6 {
+  animation-delay: 0.3s;
+}
+.stagger-7 {
+  animation-delay: 0.35s;
+}
 
 /* Respect reduced-motion preference — accessibility */
 @media (prefers-reduced-motion: reduce) {
@@ -126,7 +215,9 @@ body {
 
 /* Each letter bobs up and down, forever */
 @keyframes letterBounce {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
   }
   30% {
@@ -142,7 +233,8 @@ body {
 
 /* Soft pulsing underline */
 @keyframes underlinePulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.35;
     transform: scaleX(1);
   }
@@ -162,4 +254,60 @@ body {
   .eyebrow-underline {
     animation: none !important;
   }
+}
+
+/* ============================================================
+   MARKDOWN — refined typography for assistant replies
+   ============================================================ */
+
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+.markdown-body > *:last-child {
+  margin-bottom: 0;
+}
+
+/* GFM tables */
+.markdown-body table {
+  width: 100%;
+  margin: 0.5rem 0;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.markdown-body th,
+.markdown-body td {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+.markdown-body th {
+  background: rgba(201, 169, 97, 0.08);
+  font-weight: 600;
+  color: var(--color-fg);
+}
+.markdown-body tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* Task lists (GFM checkboxes) */
+.markdown-body input[type="checkbox"] {
+  margin-right: 0.4rem;
+  accent-color: var(--color-accent);
+}
+
+/* Tighten nested lists */
+.markdown-body ul ul,
+.markdown-body ol ol,
+.markdown-body ul ol,
+.markdown-body ol ul {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ============================================================
+   ACTION BAR — subtle accent on hover of the bubble
+   ============================================================ */
+
+.group:hover .markdown-body {
+  /* no layout change, just ensures smooth transitions */
 }

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { persona } from "@/data/persona";
 import { ChatInput } from "./ChatInput";
 import { SuggestionChips } from "./SuggestionChips";
+import { ModeChips } from "./ModeChips";
+import type { ChatMode } from "@/lib/buildSystemPrompt";
 
 type Props = {
   onSend: (text: string) => void;
@@ -14,6 +16,10 @@ type Props = {
   isSpeechSupported: boolean;
   isMuted: boolean;
   onMuteToggle: () => void;
+  mode: ChatMode;
+  onModeChange: (mode: ChatMode) => void;
+  onOpenHistory: () => void;
+  historyCount: number;
 };
 
 export function Hero({
@@ -25,6 +31,10 @@ export function Hero({
   isSpeechSupported,
   isMuted,
   onMuteToggle,
+  mode,
+  onModeChange,
+  onOpenHistory,
+  historyCount,
 }: Props) {
   const [logoFailed, setLogoFailed] = useState(false);
 
@@ -40,7 +50,23 @@ export function Hero({
   const eyebrowText = persona.eyebrow || "";
 
   return (
-    <div className="bg-glow flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+    <div className="bg-glow relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+      {/* History button — top-right, only when there is history */}
+      {historyCount > 0 && (
+        <button
+          type="button"
+          onClick={onOpenHistory}
+          aria-label="Open chat history"
+          className="animate-fade-in-down absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-border bg-bg-soft/60 px-3 py-1.5 text-xs font-medium text-muted backdrop-blur-sm transition-all duration-300 hover:border-accent/60 hover:bg-bg-soft hover:text-fg active:scale-95 sm:right-6 sm:top-6 sm:text-sm"
+        >
+          <HistoryIcon />
+          <span className="hidden sm:inline">History</span>
+          <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-semibold text-bg">
+            {historyCount > 99 ? "99+" : historyCount}
+          </span>
+        </button>
+      )}
+
       <div className="w-full max-w-3xl text-center">
         {/* ============ ANIMATED EYEBROW ============ */}
         <div
@@ -55,11 +81,7 @@ export function Hero({
               <span
                 key={`${char}-${i}`}
                 className="eyebrow-letter"
-                style={{
-                  // Negative delay = starts mid-cycle, so it looks like
-                  // a wave already rolling, not a synchronized start.
-                  animationDelay: `${-(i * 0.08)}s`,
-                }}
+                style={{ animationDelay: `${-(i * 0.08)}s` }}
               >
                 {char === " " ? "\u00A0" : char}
               </span>
@@ -71,7 +93,6 @@ export function Hero({
             style={{ backgroundColor: eyebrowColor }}
           />
         </div>
-        {/* ============ END EYEBROW ============ */}
 
         {/* Logo */}
         <div className="animate-fade-in-scale stagger-1 flex justify-center">
@@ -95,11 +116,17 @@ export function Hero({
           {persona.tagline}
         </p>
 
+        {/* Mode chips */}
+        <div className="animate-fade-in-up stagger-4 mt-8">
+          <ModeChips mode={mode} onChange={onModeChange} disabled={isLoading} />
+        </div>
+
         {/* Input pill */}
-        <div className="animate-fade-in-up stagger-4 mt-10">
+        <div className="animate-fade-in-up stagger-5 mt-4">
           <ChatInput
             variant="hero"
             onSend={onSend}
+            onStop={() => {}}
             isLoading={isLoading}
             isListening={isListening}
             isMicSupported={isMicSupported}
@@ -111,7 +138,7 @@ export function Hero({
         </div>
 
         {/* Suggestion chips */}
-        <div className="animate-fade-in-up stagger-5 mt-6">
+        <div className="animate-fade-in-up stagger-6 mt-6">
           <SuggestionChips
             suggestions={persona.suggestions}
             onSelect={onSend}
@@ -120,35 +147,31 @@ export function Hero({
         </div>
 
         {/* Footer hint */}
-        <p className="animate-fade-in stagger-6 mt-12 text-xs text-muted/60">
+        <p className="animate-fade-in stagger-7 mt-12 text-xs text-muted/60">
           Powered by WB · {persona.role}
         </p>
       </div>
-
-      {/* Floating top-left mini-brand */}
-      <div className="animate-fade-in-down stagger-2 pointer-events-none fixed top-6 left-6 hidden sm:block">
-        <div className="flex items-center gap-3">
-          {hasLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={persona.logo}
-              alt={persona.name}
-              onError={() => setLogoFailed(true)}
-              className="h-9 w-auto max-w-[160px] object-contain"
-            />
-          ) : (
-            <>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent ring-1 ring-accent/30">
-                {initials}
-              </div>
-              <div className="text-sm">
-                <p className="font-medium text-fg">{persona.name}</p>
-                <p className="text-xs text-muted">{persona.role}</p>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
     </div>
+  );
+}
+
+/* ---------- Icons ---------- */
+
+function HistoryIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+      <polyline points="3 3 3 8 8 8" />
+      <polyline points="12 7 12 12 15 14" />
+    </svg>
   );
 }

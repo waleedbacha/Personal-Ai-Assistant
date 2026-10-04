@@ -7,7 +7,8 @@ export const persona = {
   role: "Full-Stack MERN Developer & Software Developer",
   eyebrow: "Digital Web Solutions Provider",
   eyebrowColor: "#3b82f6",
-  tagline: "Creating stunning digital experiences with modern web technologies.",
+  tagline:
+    "Creating stunning digital experiences with modern web technologies.",
   logo: "/logo.png",
   avatar: "/avatar.jpg",
 
@@ -212,6 +213,7 @@ export const persona = {
       category: "Drone / Full-Stack",
       description:
         "A workforce platform designed to connect youth with drone-career opportunities.",
+      link: "https://www.mydroneforce.com/",
       features: [
         "Four-step registration flow (intake, screening, payment, commitment pledge)",
         "Automated eligibility scoring with 13 screening questions",
@@ -228,10 +230,18 @@ export const persona = {
         "PDF agreement generation",
       ],
       stack: [
-        "React.js", "Node.js", "Express.js", "MongoDB",
-        "Stripe", "Nodemailer", "Cloudinary",
-        "Microsoft Clarity", "Google Tag Manager",
-        "Framer Motion", "Railway", "Vercel",
+        "React.js",
+        "Node.js",
+        "Express.js",
+        "MongoDB",
+        "Stripe",
+        "Nodemailer",
+        "Cloudinary",
+        "Microsoft Clarity",
+        "Google Tag Manager",
+        "Framer Motion",
+        "Railway",
+        "Vercel",
       ],
     },
     {
@@ -348,7 +358,8 @@ export const persona = {
   certifications: [
     {
       name: "Full-MERN-Stack Development",
-      provider: "Ghulam Ishaq Khan Institute (GIKI) / Ministry of Federal Education / NAVTAC",
+      provider:
+        "Ghulam Ishaq Khan Institute (GIKI) / Ministry of Federal Education / NAVTAC",
       issued: "August 2025",
       area: "MERN Stack Development — 3-month training",
     },
@@ -424,7 +435,7 @@ export const persona = {
   // CONTACT / LINKS
   // ============================================================
   contact: {
-    email: "",
+    email: "waleedbadshah@gmail.com",
     linkedin: "https://www.linkedin.com/in/waleed-badshah-93b260247/",
     portfolio: "https://waleed-portfolio-theta.vercel.app/",
     github: "",
