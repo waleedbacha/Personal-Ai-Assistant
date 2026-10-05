@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
-import { InstallBanner } from "@/components/InstallBanner";
-import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
-import { IosInstallPrompt } from "@/components/IosInstallPrompt";
+import { ClientProviders } from "@/components/ClientProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -71,9 +69,7 @@ export default function RootLayout({
     >
       <body className="antialiased">
         {children}
-        <InstallBanner />
-        <ServiceWorkerRegister />
-        <IosInstallPrompt />
+        <ClientProviders />
       </body>
     </html>
   );

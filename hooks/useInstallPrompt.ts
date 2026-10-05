@@ -15,6 +15,8 @@ export function useInstallPrompt() {
   const [shouldShowBanner, setShouldShowBanner] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     // Already installed / launched as standalone?
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -36,7 +38,6 @@ export function useInstallPrompt() {
       Date.now() - parseInt(dismissedAt, 10) < DISMISS_DURATION_MS;
 
     const handleBeforeInstall = (e: Event) => {
-      // Required — prevents the mini-infobar on mobile Chrome
       e.preventDefault();
       setDeferredPrompt(e);
 
