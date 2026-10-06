@@ -19,6 +19,11 @@ export async function POST(req: Request) {
       showContactForm,
     },
     temperature: 0.7,
+    providerOptions: {
+      groq: {
+        reasoning_effort: "low",
+      },
+    },
   });
 
   return result.toUIMessageStreamResponse();
