@@ -11,6 +11,7 @@ import { HistoryDrawer } from "@/components/HistoryDrawer";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useChatHistory } from "@/hooks/useChatHistory";
+import { useHaptics } from "@/hooks/useHaptics";
 import { detectLanguage } from "@/lib/detectLanguage";
 import { parseCardMarker } from "@/lib/cardMarkers";
 import type { ChatMode } from "@/lib/buildSystemPrompt";
@@ -23,6 +24,8 @@ export default function Home() {
     speak,
     stop: stopTts,
   } = useSpeechSynthesis();
+
+  const { tap: hapticTap } = useHaptics();
 
   const speakRef = useRef(speak);
   useEffect(() => {
@@ -49,6 +52,8 @@ export default function Home() {
   const { messages, sendMessage, status, setMessages, regenerate, stop } =
     useChat({
       onFinish: ({ message }) => {
+        hapticTap();
+
         const raw =
           message.parts
             ?.filter((p: any) => p.type === "text")
@@ -73,10 +78,12 @@ export default function Home() {
   // ---------- Send / regenerate ----------
   const handleSend = useCallback(
     (text: string) => {
+      hapticTap();
       const lang = detectLanguage(text);
       langQueueRef.current.push(lang);
       sendMessage({ text }, { body: { mode: modeRef.current } });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sendMessage],
   );
 
@@ -110,15 +117,11 @@ export default function Home() {
   }, [lastMessageId, hasStarted]);
 
   // ---------- Save current session when messages settle ----------
-  // We save whenever status becomes "ready" and there are enough messages.
-  // After saving, activeSessionId is set so a reload can mark it active.
   useEffect(() => {
     if (!historyLoaded) return;
     if (status !== "ready") return;
     if (!hasStarted) return;
 
-    // Save a fresh snapshot each time the conversation grows.
-    // We replace the previous snapshot by deleting the old activeSessionId first.
     if (activeSessionId) {
       deleteSession(activeSessionId);
     }

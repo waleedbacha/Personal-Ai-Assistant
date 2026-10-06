@@ -54,7 +54,7 @@ export function ChatInput({
       className={
         isHero
           ? "flex items-end gap-2 rounded-full border border-border bg-bg-soft/80 p-2 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-lg transition-shadow duration-300 focus-within:shadow-[0_10px_50px_rgba(201,169,97,0.15)]"
-          : "flex items-end gap-2 border-t border-border bg-bg/80 px-3 py-3 backdrop-blur-lg sm:px-6 sm:py-4"
+          : "safe-bottom safe-x flex items-end gap-2 border-t border-border bg-bg/80 px-3 py-3 backdrop-blur-lg sm:px-6 sm:py-4"
       }
     >
       <textarea
@@ -66,8 +66,8 @@ export function ChatInput({
         placeholder={isHero ? "Ask me anything…" : "Type a message…"}
         className={`flex-1 resize-none bg-transparent text-fg placeholder:text-muted/60 outline-none transition-all ${
           isHero
-            ? "max-h-40 px-4 py-2.5 text-[15px]"
-            : "max-h-40 rounded-xl bg-bg-soft px-4 py-3 text-sm sm:text-base"
+            ? "max-h-40 px-4 py-2.5 text-base"
+            : "max-h-40 rounded-xl bg-bg-soft px-4 py-3 text-base"
         }`}
       />
 

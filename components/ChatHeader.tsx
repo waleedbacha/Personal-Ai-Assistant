@@ -28,7 +28,7 @@ export function ChatHeader({
   const hasLogo = Boolean(persona.logo) && !logoFailed;
 
   return (
-    <header className="animate-fade-in-down sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-bg/80 px-4 py-3 backdrop-blur-lg sm:px-6">
+    <header className="safe-top safe-x animate-fade-in-down sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-bg/80 px-4 py-3 backdrop-blur-lg sm:px-6">
       <button
         type="button"
         onClick={onNewChat}

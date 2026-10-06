@@ -311,3 +311,64 @@ body {
 .group:hover .markdown-body {
   /* no layout change, just ensures smooth transitions */
 }
+/* ============================================================
+   SAFE AREA PADDING
+   Handles iPhone notch, Dynamic Island, and home indicator.
+   Only applies when the device actually has a safe area.
+   ============================================================ */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.safe-x {
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
+/* ============================================================
+   PREVENT INPUT ZOOM ON IOS
+   iOS zooms the page when focusing an input under 16px.
+   This keeps the visible size the same but blocks the zoom.
+   ============================================================ */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* ============================================================
+   iOS ADD-TO-HOME-SCREEN HINT
+   A small slide-up sheet with Share → Add to Home Screen steps.
+   ============================================================ */
+@keyframes sheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-sheet-up {
+  animation: sheetUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============================================================
+   OFFLINE BANNER
+   ============================================================ */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

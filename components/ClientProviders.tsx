@@ -20,12 +20,24 @@ const IosInstallPrompt = dynamic(
   { ssr: false },
 );
 
+const OfflineBanner = dynamic(
+  () => import("@/components/OfflineBanner").then((m) => m.OfflineBanner),
+  { ssr: false },
+);
+
+const IosAddToHomeHint = dynamic(
+  () => import("@/components/IosAddToHomeHint").then((m) => m.IosAddToHomeHint),
+  { ssr: false },
+);
+
 export function ClientProviders() {
   return (
     <>
+      <OfflineBanner />
       <InstallBanner />
-      <ServiceWorkerRegister />
       <IosInstallPrompt />
+      <IosAddToHomeHint />
+      <ServiceWorkerRegister />
     </>
   );
 }

@@ -148,7 +148,8 @@ export function ChatMessage({
           </div>
 
           {!isUser && text && (
-            <div className="pointer-events-none absolute -bottom-3 right-2 flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
+            <div className="absolute -bottom-3 right-2 flex items-center gap-1 opacity-100 transition-opacity duration-200 pointer-coarse:opacity-100 pointer-fine:pointer-events-none pointer-fine:opacity-0 pointer-fine:group-hover:pointer-events-auto pointer-fine:group-hover:opacity-100">
+              {" "}
               <button
                 type="button"
                 onClick={handleCopy}
@@ -157,7 +158,6 @@ export function ChatMessage({
               >
                 {copied ? <CheckIcon /> : <CopyIcon />}
               </button>
-
               {isLastAssistant && onRegenerate && (
                 <button
                   type="button"
