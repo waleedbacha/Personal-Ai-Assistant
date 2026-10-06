@@ -3,8 +3,8 @@ import { tool } from "ai";
 
 /**
  * Renders a collapsed contact form under the assistant's reply.
- * The model must write the contact channels as text BEFORE calling
- * this tool. Calling it alone produces a broken experience.
+ * The UI renders the form — the execute function is a no-op that
+ * satisfies the AI SDK's requirement that every tool call resolves.
  */
 export const showContactForm = tool({
   description:
@@ -21,4 +21,10 @@ export const showContactForm = tool({
         'Always pass "" — the contact channels are already in the reply text.',
       ),
   }),
+  execute: async ({ intro }) => {
+    // No-op. The UI renders the form; this exists only so the
+    // SDK receives a tool result and doesn't throw
+    // AI_MissingToolResultsError.
+    return { shown: true, intro: intro ?? "" };
+  },
 });

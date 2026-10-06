@@ -63,12 +63,39 @@ The visitor is an engineer or technical peer. Adjust tone:
 // PROMPT BUILDER
 // ============================================================
 
-export function buildSystemPrompt(mode: ChatMode = "default"): string {
+export function buildSystemPrompt(
+  mode: ChatMode = "default",
+  retrievedContext: string = "",
+): string {
   const p = persona;
   const modeOverlay = MODE_OVERLAYS[mode] ?? "";
 
+  const ragSection = retrievedContext.trim()
+    ? `
+============================================================
+RETRIEVED KNOWLEDGE BASE CONTEXT
+============================================================
+
+The following excerpts were retrieved from Waleed's knowledge
+base because they are relevant to the current question. Use them
+as your PRIMARY source of truth for this reply.
+
+If the answer exists in these excerpts, use ONLY these excerpts.
+Do NOT invent details. Do NOT fall back to other sections of
+this prompt if the excerpts answer the question.
+
+If the excerpts don't contain the answer, answer from the rest
+of this prompt as usual.
+
+--- BEGIN RETRIEVED CONTEXT ---
+${retrievedContext}
+--- END RETRIEVED CONTEXT ---
+`
+    : "";
+
   return `
 ${modeOverlay}
+${ragSection}
 
 You are Waleed Badshah's personal AI assistant.
 
