@@ -6,15 +6,15 @@ import { persona } from "@/data/persona";
 type Props = {
   isLoading: boolean;
   onNewChat: () => void;
-  onOpenHistory: () => void;
-  historyCount: number;
+  onOpenMenu: () => void;
+  dueRemindersCount: number;
 };
 
 export function ChatHeader({
   isLoading,
   onNewChat,
-  onOpenHistory,
-  historyCount,
+  onOpenMenu,
+  dueRemindersCount,
 }: Props) {
   const [logoFailed, setLogoFailed] = useState(false);
 
@@ -68,14 +68,14 @@ export function ChatHeader({
 
       <button
         type="button"
-        onClick={onOpenHistory}
-        aria-label="Open chat history"
+        onClick={onOpenMenu}
+        aria-label="Open menu"
         className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-bg-soft/60 text-muted transition-all duration-300 hover:border-accent/60 hover:bg-bg-soft hover:text-fg active:scale-95"
       >
-        <HistoryIcon />
-        {historyCount > 0 && (
+        <MenuIcon />
+        {dueRemindersCount > 0 && (
           <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-semibold text-bg">
-            {historyCount > 99 ? "99+" : historyCount}
+            {dueRemindersCount > 9 ? "9+" : dueRemindersCount}
           </span>
         )}
       </button>
@@ -84,18 +84,37 @@ export function ChatHeader({
         type="button"
         onClick={onNewChat}
         aria-label="Start a new chat"
-        className="group flex items-center gap-1.5 rounded-full border border-border bg-bg-soft/60 px-3 py-1.5 text-xs font-medium text-muted transition-all duration-300 hover:border-accent/60 hover:bg-bg-soft hover:text-fg active:scale-95 sm:text-sm"
+        className="group hidden items-center gap-1.5 rounded-full border border-border bg-bg-soft/60 px-3 py-1.5 text-xs font-medium text-muted transition-all duration-300 hover:border-accent/60 hover:bg-bg-soft hover:text-fg active:scale-95 sm:flex sm:text-sm"
       >
         <span className="transition-transform duration-300 group-hover:rotate-90">
           <PlusIcon />
         </span>
-        <span className="hidden sm:inline">New chat</span>
+        <span>New chat</span>
       </button>
     </header>
   );
 }
 
 /* ---------- Icons ---------- */
+
+function MenuIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
 
 function PlusIcon() {
   return (
@@ -111,25 +130,6 @@ function PlusIcon() {
     >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-function HistoryIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
-      <polyline points="3 3 3 8 8 8" />
-      <polyline points="12 7 12 12 15 14" />
     </svg>
   );
 }

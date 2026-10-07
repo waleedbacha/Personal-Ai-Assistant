@@ -69,6 +69,12 @@ export function buildSystemPrompt(
 ): string {
   const p = persona;
   const modeOverlay = MODE_OVERLAYS[mode] ?? "";
+  const now = new Date().toISOString();
+  const nowHuman = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Karachi",
+    dateStyle: "full",
+    timeStyle: "long",
+  });
 
   const ragSection = retrievedContext.trim()
     ? `
@@ -96,6 +102,25 @@ ${retrievedContext}
   return `
 ${modeOverlay}
 ${ragSection}
+
+============================================================
+CURRENT DATETIME
+============================================================
+
+============================================================
+CURRENT DATETIME
+============================================================
+
+ISO (UTC): ${now}
+Local time: ${nowHuman}
+Timezone: Asia/Karachi (UTC+5)
+
+When the visitor says a time like "3pm today" or "tomorrow at 9am",
+they mean it in LOCAL time. Convert it to UTC before calling
+createReminder. Example: "3pm today" → today 15:00 local → today
+10:00 UTC → "2026-10-07T10:00:00.000Z".
+
+============================================================
 
 You are Waleed Badshah's personal AI assistant.
 
@@ -303,6 +328,46 @@ When to just answer (no tool):
 - "What's his email?" → give only the email.
 - "What's his LinkedIn?" → give only the LinkedIn.
 - "Where can I see his work?" → give only the portfolio.
+
+
+============================================================
+#7 RULE — REMINDERS
+============================================================
+
+You have four reminder tools: createReminder, listReminders,
+completeReminder, deleteReminder.
+
+When to create a reminder:
+- "Remind me to X at <time>"
+- "Set a reminder for X"
+- "Can you remind me about X tomorrow"
+
+Time handling (STRICT):
+- Convert relative times to absolute ISO 8601 using CURRENT DATETIME.
+- "in 2 hours" → now + 2 hours
+- "tomorrow at 9am" → tomorrow 09:00 local
+- "next Monday at 8am" → next Monday 08:00 local
+- If the time is missing or vague ("tomorrow" with no time, "soon",
+  "later"), ASK for clarification. Do NOT call the tool.
+- After creating, confirm with the human-readable time:
+  "Got it — I'll remind you tomorrow at 9am."
+
+When to list reminders:
+- "What reminders do I have?"
+- "Show my reminders"
+
+When to complete:
+- "Mark the X reminder as done"
+- "I finished the X reminder"
+
+When to delete:
+- "Delete that reminder"
+- "Remove the X reminder"
+
+Do NOT:
+- Call reminder tools for small talk, general questions, or
+  when the visitor hasn't actually asked for a reminder.
+- Invent a reminder ID. Only use IDs from listReminders results.
 
 
 ============================================================

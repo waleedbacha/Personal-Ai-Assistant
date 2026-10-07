@@ -7,11 +7,12 @@ import { ChatHeader } from "@/components/ChatHeader";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { ModeChips } from "@/components/ModeChips";
-import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { SideMenu } from "@/components/SideMenu";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useChatHistory } from "@/hooks/useChatHistory";
-import { useHaptics } from "@/hooks/useHaptics";
+import { useVisitorId } from "@/hooks/useVisitorId";
+import { useReminders } from "@/hooks/useReminders";
 import { detectLanguage } from "@/lib/detectLanguage";
 import { parseCardMarker } from "@/lib/cardMarkers";
 import type { ChatMode } from "@/lib/buildSystemPrompt";
@@ -25,7 +26,7 @@ export default function Home() {
     stop: stopTts,
   } = useSpeechSynthesis();
 
-  const { tap: hapticTap } = useHaptics();
+  const { tap: hapticTap } = useHapticsSafe();
 
   const speakRef = useRef(speak);
   useEffect(() => {
@@ -34,6 +35,18 @@ export default function Home() {
 
   const langQueueRef = useRef<string[]>([]);
   const [mode, setMode] = useState<ChatMode>("default");
+
+  // ---------- Visitor + reminders ----------
+  const visitorId = useVisitorId();
+  const {
+    items: reminders,
+    dueCount,
+    isLoading: remindersLoading,
+    error: remindersError,
+    refresh: refreshReminders,
+    complete: completeReminder,
+    remove: deleteReminder,
+  } = useReminders(visitorId);
 
   // ---------- History ----------
   const {
@@ -45,14 +58,14 @@ export default function Home() {
     getSession,
   } = useChatHistory();
 
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   // ---------- Chat ----------
   const { messages, sendMessage, status, setMessages, regenerate, stop } =
     useChat({
       onFinish: ({ message }) => {
-        hapticTap();
+        hapticTap?.();
 
         const raw =
           message.parts
@@ -63,6 +76,9 @@ export default function Home() {
         const { text: spoken } = parseCardMarker(raw);
         const lang = langQueueRef.current.shift() ?? "en";
         if (spoken) speakRef.current(spoken, lang);
+
+        // Refresh reminders — the assistant may have created one
+        refreshReminders();
       },
     });
 
@@ -78,13 +94,18 @@ export default function Home() {
   // ---------- Send / regenerate ----------
   const handleSend = useCallback(
     (text: string) => {
-      hapticTap();
+      hapticTap?.();
       const lang = detectLanguage(text);
       langQueueRef.current.push(lang);
-      sendMessage({ text }, { body: { mode: modeRef.current } });
+      sendMessage(
+        { text },
+        {
+          body: { mode: modeRef.current, visitorId: visitorId ?? "anonymous" },
+        },
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sendMessage],
+    [sendMessage, visitorId],
   );
 
   const handleStop = useCallback(() => {
@@ -95,8 +116,10 @@ export default function Home() {
   const handleRegenerate = useCallback(() => {
     stopTts();
     langQueueRef.current.push("en");
-    regenerate({ body: { mode: modeRef.current } });
-  }, [regenerate, stopTts]);
+    regenerate({
+      body: { mode: modeRef.current, visitorId: visitorId ?? "anonymous" },
+    });
+  }, [regenerate, stopTts, visitorId]);
 
   const {
     isListening,
@@ -116,7 +139,7 @@ export default function Home() {
     }
   }, [lastMessageId, hasStarted]);
 
-  // ---------- Save current session when messages settle ----------
+  // ---------- Session save ----------
   useEffect(() => {
     if (!historyLoaded) return;
     if (status !== "ready") return;
@@ -152,7 +175,6 @@ export default function Home() {
       setMessages(session.messages);
       setMode(session.mode);
       setActiveSessionId(session.id);
-      setHistoryOpen(false);
       langQueueRef.current = [];
     },
     [getSession, setMessages, stopTts, stopMic, isListening],
@@ -188,8 +210,8 @@ export default function Home() {
             onMuteToggle={() => setIsMuted((v) => !v)}
             mode={mode}
             onModeChange={setMode}
-            onOpenHistory={() => setHistoryOpen(true)}
-            historyCount={sessions.length}
+            onOpenMenu={() => setMenuOpen(true)}
+            dueRemindersCount={dueCount}
           />
         </div>
       ) : (
@@ -197,8 +219,8 @@ export default function Home() {
           <ChatHeader
             isLoading={isLoading}
             onNewChat={handleNewChat}
-            onOpenHistory={() => setHistoryOpen(true)}
-            historyCount={sessions.length}
+            onOpenMenu={() => setMenuOpen(true)}
+            dueRemindersCount={dueCount}
           />
 
           <div className="flex-1 overflow-y-auto px-3 py-5 sm:px-6 sm:py-6">
@@ -237,15 +259,34 @@ export default function Home() {
         </div>
       )}
 
-      <HistoryDrawer
-        open={historyOpen}
-        onClose={() => setHistoryOpen(false)}
+      <SideMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        reminders={reminders}
+        remindersLoading={remindersLoading}
+        remindersError={remindersError}
+        dueCount={dueCount}
+        onCompleteReminder={completeReminder}
+        onDeleteReminder={deleteReminder}
         sessions={sessions}
-        activeId={activeSessionId}
-        onSelect={handleSelectSession}
-        onDelete={handleDeleteSession}
-        onClearAll={handleClearAll}
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onDeleteSession={handleDeleteSession}
+        onClearAllSessions={handleClearAll}
+        onNewChat={handleNewChat}
       />
     </main>
   );
+}
+
+// Fallback in case useHaptics isn't installed yet
+function useHapticsSafe() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require("@/hooks/useHaptics");
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return mod.useHaptics();
+  } catch {
+    return { tap: () => {}, double: () => {} };
+  }
 }

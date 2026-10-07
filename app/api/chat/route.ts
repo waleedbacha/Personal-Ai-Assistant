@@ -1,7 +1,8 @@
-import { streamText, convertToModelMessages, UIMessage } from "ai";
+import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { CHAT_MODEL } from "@/lib/ai";
 import { buildSystemPrompt, type ChatMode } from "@/lib/buildSystemPrompt";
 import { showContactForm } from "@/lib/contactTool";
+import { buildReminderTools } from "@/lib/reminderTool";
 import { retrieve } from "@/lib/rag";
 
 export const maxDuration = 30;
@@ -10,7 +11,12 @@ export async function POST(req: Request) {
   const {
     messages,
     mode = "default",
-  }: { messages: UIMessage[]; mode?: ChatMode } = await req.json();
+    visitorId = "anonymous",
+  }: {
+    messages: UIMessage[];
+    mode?: ChatMode;
+    visitorId?: string;
+  } = await req.json();
 
   // ------------------------------------------------------------
   // 1. Extract the latest user message
@@ -27,14 +33,13 @@ export async function POST(req: Request) {
       .trim() ?? "";
 
   // ------------------------------------------------------------
-  // 2. Retrieve relevant chunks from the knowledge base
+  // 2. RAG retrieval
   // ------------------------------------------------------------
   let retrievedContext = "";
 
   if (lastUserText) {
     try {
       const chunks = await retrieve(lastUserText, 5);
-
       if (chunks.length > 0) {
         retrievedContext = chunks
           .map(
@@ -44,25 +49,26 @@ export async function POST(req: Request) {
               )})\n${c.text}`,
           )
           .join("\n\n---\n\n");
-
-        console.log(
-          `[chat] Retrieved ${chunks.length} chunks from knowledge base`,
-        );
+        console.log(`[chat] Retrieved ${chunks.length} chunks`);
       }
     } catch (err) {
-      // Retrieval failure must not break the chat.
-      // Fall back to the standard prompt without context.
       console.error("[chat] RAG retrieval failed:", err);
     }
   }
 
   // ------------------------------------------------------------
-  // 3. Build the system prompt with the retrieved context
+  // 3. System prompt + tools
   // ------------------------------------------------------------
   const systemPrompt = buildSystemPrompt(mode, retrievedContext);
+  const reminderTools = buildReminderTools(visitorId);
 
   // ------------------------------------------------------------
-  // 4. Stream the response
+  // 4. Stream with loop prevention
+  //
+  // stopWhen: stepCountIs(1) — allow exactly one model step:
+  //   either a text reply OR a tool call. The UI renders the
+  //   result directly from the tool part, so no follow-up step
+  //   is needed. This avoids Groq's multi-step tool loop bug.
   // ------------------------------------------------------------
   const result = streamText({
     model: CHAT_MODEL,
@@ -70,11 +76,14 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     tools: {
       showContactForm,
+      ...reminderTools,
     },
     temperature: 0.7,
+    stopWhen: stepCountIs(1),
     providerOptions: {
       groq: {
         reasoning_effort: "low",
+        reasoning_format: "hidden",
       },
     },
   });

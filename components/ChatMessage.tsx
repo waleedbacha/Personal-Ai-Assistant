@@ -7,6 +7,7 @@ import { resolveProjects } from "@/lib/projects";
 import { ProjectCards } from "./ProjectCards";
 import { Markdown } from "./Markdown";
 import { ContactForm } from "./ContactForm";
+import { ReminderConfirmation } from "./ReminderConfirmation";
 
 type Props = {
   message: UIMessage;
@@ -18,9 +19,6 @@ type Props = {
 
 // ============================================================
 // Fallback contact text
-// Shown only when the model fires showContactForm but does not
-// emit a text part. Guarantees the visitor always sees the
-// contact channels above the form.
 // ============================================================
 const FALLBACK_CONTACT_TEXT =
   "You can reach Waleed through:\n\n" +
@@ -33,6 +31,58 @@ function isRTL(text: string): boolean {
   const rtlRegex =
     /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
   return rtlRegex.test(text);
+}
+
+// ============================================================
+// Find a completed reminder tool call in the message parts
+// ============================================================
+type ReminderAction = {
+  action: "created" | "completed" | "deleted";
+  text?: string;
+  dueAt?: string;
+};
+
+function findReminderAction(parts: any[] | undefined): ReminderAction | null {
+  if (!parts) return null;
+
+  // Iterate in reverse — we want the most recent tool action
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    if (!p || typeof p !== "object") continue;
+
+    // Tool name detection across naming conventions
+    let toolName: string | undefined;
+    if (typeof p.type === "string" && p.type.startsWith("tool-")) {
+      toolName = p.type.slice(5);
+    }
+    if (!toolName && typeof p.toolName === "string") {
+      toolName = p.toolName;
+    }
+    if (!toolName && p.toolInvocation?.toolName) {
+      toolName = p.toolInvocation.toolName;
+    }
+
+    if (!toolName) continue;
+
+    // Output detection — the tool result
+    const output = p.output ?? p.result ?? p.toolInvocation?.result;
+
+    if (toolName === "createReminder" && output?.ok) {
+      return {
+        action: "created",
+        text: output.text,
+        dueAt: output.dueAt,
+      };
+    }
+    if (toolName === "completeReminder" && output?.ok) {
+      return { action: "completed" };
+    }
+    if (toolName === "deleteReminder" && output?.ok) {
+      return { action: "deleted" };
+    }
+  }
+
+  return null;
 }
 
 export function ChatMessage({
@@ -78,6 +128,13 @@ export function ChatMessage({
     undefined;
 
   // ============================================================
+  // Detect reminder tool actions
+  // ============================================================
+  const reminderAction = isUser
+    ? null
+    : findReminderAction(message.parts as any);
+
+  // ============================================================
   // Project card markers
   // ============================================================
   const parsed = isUser
@@ -105,10 +162,12 @@ export function ChatMessage({
     }
   };
 
-  // Show the bubble whenever we have text OR we're not waiting on
-  // a pending project marker. Contact tool fires always have text
-  // now (fallback), so they always render the bubble.
-  const showBubble = Boolean(text) || !parsed.pending;
+  // Show the bubble only when there's real text to show.
+  // If a reminder action is present, the confirmation card carries the
+  // message and we suppress the bubble so the typing dots don't render
+  // forever.
+  const showBubble =
+    Boolean(text) || (!parsed.pending && !contactToolPart && !reminderAction);
 
   return (
     <div
@@ -148,8 +207,7 @@ export function ChatMessage({
           </div>
 
           {!isUser && text && (
-            <div className="absolute -bottom-3 right-2 flex items-center gap-1 opacity-100 transition-opacity duration-200 pointer-coarse:opacity-100 pointer-fine:pointer-events-none pointer-fine:opacity-0 pointer-fine:group-hover:pointer-events-auto pointer-fine:group-hover:opacity-100">
-              {" "}
+            <div className="pointer-coarse:opacity-100 pointer-fine:pointer-events-none pointer-fine:opacity-0 pointer-fine:group-hover:pointer-events-auto pointer-fine:group-hover:opacity-100 absolute -bottom-3 right-2 flex items-center gap-1 transition-opacity duration-200">
               <button
                 type="button"
                 onClick={handleCopy}
@@ -178,6 +236,14 @@ export function ChatMessage({
         <div className="w-full max-w-[88%] sm:max-w-[72%]">
           <ProjectCards projects={cards} onAsk={onAsk} />
         </div>
+      )}
+
+      {!isUser && reminderAction && (
+        <ReminderConfirmation
+          action={reminderAction.action}
+          text={reminderAction.text}
+          dueAt={reminderAction.dueAt}
+        />
       )}
 
       {!isUser && contactToolPart && <ContactForm intro={contactIntro} />}
