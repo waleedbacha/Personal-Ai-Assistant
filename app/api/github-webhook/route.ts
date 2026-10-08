@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { payloadToDocuments } from "@/lib/github";
-import { ingestDocuments } from "@/lib/rag";
+import { appendDocuments } from "@/lib/rag";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-// ------------------------------------------------------------
-// HMAC-SHA256 signature verification
-// ------------------------------------------------------------
 function verifySignature(
   rawBody: string,
   signatureHeader: string | null,
@@ -26,9 +23,6 @@ function verifySignature(
   }
 }
 
-// ------------------------------------------------------------
-// POST handler
-// ------------------------------------------------------------
 export async function POST(req: Request) {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
 
@@ -40,11 +34,9 @@ export async function POST(req: Request) {
     );
   }
 
-  // 1. Read the raw body (needed for signature verification)
   const rawBody = await req.text();
-
-  // 2. Verify the signature
   const signature = req.headers.get("x-hub-signature-256");
+
   if (!verifySignature(rawBody, signature, secret)) {
     console.warn("[github-webhook] Invalid signature — rejecting");
     return NextResponse.json(
@@ -53,10 +45,8 @@ export async function POST(req: Request) {
     );
   }
 
-  // 3. Check the event type
   const event = req.headers.get("x-github-event");
 
-  // GitHub sends a "ping" event when the webhook is first created
   if (event === "ping") {
     console.log(
       "[github-webhook] Ping received — webhook is configured correctly",
@@ -65,11 +55,9 @@ export async function POST(req: Request) {
   }
 
   if (event !== "push") {
-    // Ignore everything else (we only configured push, but be safe)
     return NextResponse.json({ ok: true, ignored: event });
   }
 
-  // 4. Parse the payload
   let payload: any;
   try {
     payload = JSON.parse(rawBody);
@@ -80,7 +68,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // 5. Convert commits to documents
   const documents = payloadToDocuments(payload);
 
   if (documents.length === 0) {
@@ -88,9 +75,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, ingested: 0 });
   }
 
-  // 6. Ingest into the knowledge base
   try {
-    const count = await ingestDocuments(documents);
+    const count = await appendDocuments(documents);
     console.log(
       `[github-webhook] Ingested ${count} chunks from ${documents.length} docs`,
     );

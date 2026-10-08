@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤖 Personal AI Assistant — Waleed Badshah
 
-## Getting Started
+A production-grade, installable AI assistant that answers questions about my professional background, projects, skills, and contact information. Built with Next.js, Groq, MongoDB Atlas, and Google Gemini — deployed on Vercel.
 
-First, run the development server:
+**Live:** [https://personal-ai-assistant-theta-self.vercel.app](https://personal-ai-assistant-theta-self.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📌 Overview
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This is not a wrapper around ChatGPT. It's a complete AI product with:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Retrieval-Augmented Generation (RAG) from a vector database
+- Tool-calling for reminders and contact capture
+- A progressive web app (PWA) installable on iOS and Android
+- Real-time knowledge updates via GitHub webhooks
+- Multilingual voice input and output
 
-## Learn More
+The assistant answers only from a curated knowledge base — it never invents details, and it enforces strict answer-length rules so responses stay natural, not bloated.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✨ Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Conversational
 
-## Deploy on Vercel
+- **Streaming responses** — tokens render as they arrive, not all at once
+- **Markdown rendering** — links, lists, code blocks, tables render correctly
+- **Copy / Regenerate / Stop** — full control over every reply
+- **Multi-language** — auto-detects English, Urdu, Arabic, Roman Urdu, and mixes naturally
+- **Voice input** — Web Speech API with auto-language detection
+- **Voice output** — Text-to-speech with per-language voice matching
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Rich content
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Project cards** — swipeable cards with screenshots, tech stack, status, and live links
+- **Contact form** — inline form that emails submissions to my inbox via Resend
+- **Reminder system** — natural-language reminders stored in MongoDB, viewable in a side menu
+- **Recruiter / Client / Technical modes** — the assistant adjusts its tone and focus per audience
+
+### Platform
+
+- **PWA installable** — works offline, launches fullscreen from the home screen
+- **iOS install guide** — auto-detects Safari and shows Add to Home Screen steps
+- **Android install banner** — appears after the second visit, dismissible
+- **Safe-area aware** — respects notch, Dynamic Island, and home indicator
+- **Dark theme** — gold accents, refined typography, serif headings
+- **Haptic feedback** — subtle vibration on Android when sending / receiving
+- **Offline banner** — shows when the device loses connection
+
+### Intelligence
+
+- **RAG via MongoDB Atlas** — persona, CV, project writeups, and GitHub commits are embedded and retrieved by vector similarity
+- **GitHub integration** — every push to any of my repos triggers a webhook that ingests the commit into the knowledge base in real time
+- **Multi-step tool calling** — the model chooses when to show a form, create a reminder, or answer in plain text
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer            | Technology                                               |
+| ---------------- | -------------------------------------------------------- |
+| Framework        | Next.js 16 (App Router, Turbopack)                       |
+| Language         | TypeScript (strict)                                      |
+| Styling          | Tailwind CSS v4                                          |
+| LLM (chat)       | Groq — `openai/gpt-oss-120a`                             |
+| LLM (embeddings) | Google Gemini — `gemini-embedding-041`                   |
+| Vector database  | MongoDB Atlas (Vector Search)                            |
+| Document store   | MongoDB Atlas                                            |
+| Email            | Resend                                                   |
+| Icons / fonts    | `next/font` (Inter, Playfair Display, Noto Naskh Arabic) |
+| Markdown         | `react-markdown` + `remark-gfm`                          |
+| Deployment       | Vercel                                                   |
+
+---
+
+**Policy section:**
+
+- Clear "All rights reserved" statement
+- ✅ What visitors **can** do (read, fork locally, submit PRs)
+- ❌ What visitors **cannot** do (copy, redeploy, redistribute, commercial use)
+- Explicit legal notice about copyright infringement
+- Contact information for licensing requests
+- Copyright symbol with the year
+
+**Footer:**
+
+- Direct links to email, LinkedIn, portfolio
+- A star-the-repo call to action
