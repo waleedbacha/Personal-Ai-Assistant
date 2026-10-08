@@ -5,19 +5,15 @@ import { embedOne, embedManyTexts } from "./embeddings";
 // Chunking
 // ------------------------------------------------------------
 
-const DEFAULT_CHUNK_SIZE = 800; // characters, roughly 200 tokens
-const DEFAULT_OVERLAP = 100; // characters of overlap between chunks
+const DEFAULT_CHUNK_SIZE = 800;
+const DEFAULT_OVERLAP = 100;
 
 export type Chunk = {
   text: string;
-  source: string; // e.g. "persona.ts", "cv.pdf", "project-writeup.md"
+  source: string;
   chunkIndex: number;
 };
 
-/**
- * Split a long string into overlapping chunks.
- * Tries to break on paragraph boundaries when possible.
- */
 export function chunkText(
   text: string,
   source: string,
@@ -27,7 +23,6 @@ export function chunkText(
   const cleaned = text.trim();
   if (!cleaned) return [];
 
-  // Short text — one chunk
   if (cleaned.length <= chunkSize) {
     return [{ text: cleaned, source, chunkIndex: 0 }];
   }
@@ -39,7 +34,6 @@ export function chunkText(
   while (start < cleaned.length) {
     let end = Math.min(start + chunkSize, cleaned.length);
 
-    // Try to end on a paragraph break, then sentence, then word
     if (end < cleaned.length) {
       const slice = cleaned.slice(start, end);
       const paragraphBreak = slice.lastIndexOf("\n\n");
@@ -61,7 +55,6 @@ export function chunkText(
       index++;
     }
 
-    // Next start with overlap
     start = Math.max(end - overlap, end);
     if (start >= cleaned.length) break;
   }
@@ -70,7 +63,7 @@ export function chunkText(
 }
 
 // ------------------------------------------------------------
-// Ingestion
+// Ingestion types
 // ------------------------------------------------------------
 
 export type IngestDocument = {
@@ -78,20 +71,16 @@ export type IngestDocument = {
   source: string;
 };
 
-/**
- * Ingest an array of documents into MongoDB Atlas.
- * - Chunks each document
- * - Embeds all chunks in batches
- * - Upserts into the knowledge collection
- *
- * Returns the number of chunks stored.
- */
+// ------------------------------------------------------------
+// ingestDocuments — REPLACES existing chunks for the same source
+// Use for persona, CV, project writeups (fixed content).
+// ------------------------------------------------------------
+
 export async function ingestDocuments(
   documents: IngestDocument[],
 ): Promise<number> {
   const collection = await getKnowledgeCollection();
 
-  // 1. Chunk everything
   const allChunks: Chunk[] = [];
   for (const doc of documents) {
     const chunks = chunkText(doc.text, doc.source);
@@ -104,7 +93,6 @@ export async function ingestDocuments(
     `[rag] Chunked ${documents.length} docs into ${allChunks.length} chunks`,
   );
 
-  // 2. Embed in batches of 50 (OpenAI allows up to 2048 per request, 50 is safe)
   const BATCH_SIZE = 50;
   const embeddings: number[][] = [];
 
@@ -115,7 +103,6 @@ export async function ingestDocuments(
     console.log(`[rag] Embedded ${embeddings.length}/${allChunks.length}`);
   }
 
-  // 3. Upsert into MongoDB. We clear old entries by source to avoid duplicates.
   const sources = [...new Set(allChunks.map((c) => c.source))];
   await collection.deleteMany({ source: { $in: sources } });
 
@@ -132,9 +119,51 @@ export async function ingestDocuments(
   return docs.length;
 }
 
-/**
- * Clear the entire knowledge collection.
- */
+// ------------------------------------------------------------
+// appendDocuments — ADDS chunks without deleting existing ones
+// Use for GitHub webhooks so commit history accumulates.
+// ------------------------------------------------------------
+
+export async function appendDocuments(
+  documents: IngestDocument[],
+): Promise<number> {
+  const collection = await getKnowledgeCollection();
+
+  const allChunks: Chunk[] = [];
+  for (const doc of documents) {
+    const chunks = chunkText(doc.text, doc.source);
+    allChunks.push(...chunks);
+  }
+
+  if (allChunks.length === 0) return 0;
+
+  const BATCH_SIZE = 50;
+  const embeddings: number[][] = [];
+
+  for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
+    const batch = allChunks.slice(i, i + BATCH_SIZE);
+    const batchEmbeddings = await embedManyTexts(batch.map((c) => c.text));
+    embeddings.push(...batchEmbeddings);
+  }
+
+  const docs = allChunks.map((chunk, i) => ({
+    text: chunk.text,
+    source: chunk.source,
+    chunkIndex: chunk.chunkIndex,
+    embedding: embeddings[i],
+    ingestedAt: new Date().toISOString(),
+  }));
+
+  await collection.insertMany(docs);
+  console.log(`[rag] Appended ${docs.length} chunks to MongoDB`);
+
+  return docs.length;
+}
+
+// ------------------------------------------------------------
+// clearKnowledge
+// ------------------------------------------------------------
+
 export async function clearKnowledge(): Promise<void> {
   const collection = await getKnowledgeCollection();
   await collection.deleteMany({});
@@ -150,9 +179,6 @@ export type RetrievedChunk = {
   score: number;
 };
 
-/**
- * Retrieve the top-K most relevant chunks for a query.
- */
 export async function retrieve(
   query: string,
   topK: number = 5,
