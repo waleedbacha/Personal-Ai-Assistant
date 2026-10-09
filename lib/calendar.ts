@@ -41,6 +41,7 @@ type GoogleCalendarEvent = {
 export type CalendarIngestDoc = {
   text: string;
   source: string;
+  dedupeKey: string;
 };
 
 // ------------------------------------------------------------
@@ -150,9 +151,18 @@ export function eventToDocument(
   const start = event.start?.dateTime ?? event.start?.date;
   if (!start) return null;
 
+  // The dedupeKey combines the event ID with its last-updated timestamp.
+  // If the event changes, Google bumps `updated`, so the key changes and
+  // the new version gets re-embedded. If nothing changed, the key is the
+  // same as the previous run, and we skip it.
+  const updated =
+    (event as any).updated ?? event.start?.dateTime ?? event.start?.date ?? "";
+  const dedupeKey = `event:${event.id}:${updated}`;
+
   return {
     text: formatEvent(event),
     source: "google-calendar",
+    dedupeKey,
   };
 }
 

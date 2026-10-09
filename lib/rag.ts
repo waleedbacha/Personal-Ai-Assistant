@@ -169,6 +169,110 @@ export async function clearKnowledge(): Promise<void> {
   await collection.deleteMany({});
 }
 
+/**
+ * Like appendDocuments, but skips chunks whose `dedupeKey` already exists
+ * in the collection for the same source. Use this for webhook-driven
+ * ingestion (calendar, GitHub) to avoid duplicates.
+ */
+export async function appendDocumentsDeduped(
+  documents: Array<IngestDocument & { dedupeKey: string }>,
+): Promise<{ inserted: number; skipped: number }> {
+  const collection = await getKnowledgeCollection();
+
+  if (documents.length === 0) return { inserted: 0, skipped: 0 };
+
+  // 1. Group documents by source — different sources have different dedupeKey namespaces
+  const bySource = new Map<
+    string,
+    Array<IngestDocument & { dedupeKey: string }>
+  >();
+
+  for (const doc of documents) {
+    const list = bySource.get(doc.source) ?? [];
+    list.push(doc);
+    bySource.set(doc.source, list);
+  }
+
+  // 2. For each source, query existing dedupeKeys in one round trip
+  const toIngest: IngestDocument[] = [];
+  let skippedCount = 0;
+
+  for (const [source, docs] of bySource) {
+    const keys = docs.map((d) => d.dedupeKey);
+
+    const existing = await collection
+      .find({ source, dedupeKey: { $in: keys } })
+      .project({ dedupeKey: 1 })
+      .toArray();
+
+    const existingSet = new Set(existing.map((d) => d.dedupeKey as string));
+
+    for (const doc of docs) {
+      if (existingSet.has(doc.dedupeKey)) {
+        skippedCount++;
+        continue;
+      }
+      toIngest.push({ text: doc.text, source: doc.source });
+    }
+  }
+
+  if (toIngest.length === 0) {
+    console.log(
+      `[rag] All ${documents.length} docs already ingested — nothing to embed`,
+    );
+    return { inserted: 0, skipped: skippedCount };
+  }
+
+  // 3. Chunk + embed only the new documents
+  const allChunks: Array<Chunk & { dedupeKey: string }> = [];
+
+  for (const doc of toIngest) {
+    // Find the original dedupeKey for this text/source pair
+    const original = documents.find(
+      (d) => d.text === doc.text && d.source === doc.source,
+    );
+    const key = original?.dedupeKey ?? "";
+
+    const chunks = chunkText(doc.text, doc.source);
+    for (const c of chunks) {
+      allChunks.push({
+        ...c,
+        dedupeKey: `${key}:chunk-${c.chunkIndex}`,
+      });
+    }
+  }
+
+  const BATCH_SIZE = 20;
+  const embeddings: number[][] = [];
+
+  for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
+    const batch = allChunks.slice(i, i + BATCH_SIZE);
+    const batchEmbeddings = await embedManyTexts(batch.map((c) => c.text));
+    embeddings.push(...batchEmbeddings);
+
+    if (i + BATCH_SIZE < allChunks.length) {
+      await new Promise((r) => setTimeout(r, 1200));
+    }
+  }
+
+  // 4. Insert with dedupeKey so the next run can skip them
+  const docs = allChunks.map((chunk, i) => ({
+    text: chunk.text,
+    source: chunk.source,
+    chunkIndex: chunk.chunkIndex,
+    embedding: embeddings[i],
+    dedupeKey: chunk.dedupeKey,
+    ingestedAt: new Date().toISOString(),
+  }));
+
+  await collection.insertMany(docs);
+  console.log(
+    `[rag] Deduped ingest: inserted ${docs.length} chunks, skipped ${skippedCount} existing docs`,
+  );
+
+  return { inserted: docs.length, skipped: skippedCount };
+}
+
 // ------------------------------------------------------------
 // Retrieval
 // ------------------------------------------------------------

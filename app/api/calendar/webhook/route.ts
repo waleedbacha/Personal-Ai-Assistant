@@ -4,8 +4,9 @@ import {
   eventToDocument,
   loadCalendarToken,
   saveCalendarToken,
+  CalendarIngestDoc,
 } from "@/lib/calendar";
-import { appendDocuments } from "@/lib/rag";
+import { appendDocumentsDeduped } from "@/lib/rag";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -43,10 +44,13 @@ export async function POST(req: Request) {
       .filter((d): d is NonNullable<typeof d> => d !== null);
 
     let ingested = 0;
+    let skipped = 0;
     if (docs.length > 0) {
-      ingested = await appendDocuments(docs);
+      const result = await appendDocumentsDeduped(docs);
+      ingested = result.inserted;
+      skipped = result.skipped;
       console.log(
-        `[calendar/webhook] Ingested ${ingested} chunks from ${docs.length} events`,
+        `[calendar/webhook] Ingested ${ingested} chunks (skipped ${skipped} already-stored events) from ${docs.length} fetched`,
       );
     }
 
@@ -66,4 +70,9 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+}
+function appendDocuments(
+  docs: CalendarIngestDoc[],
+): number | PromiseLike<number> {
+  throw new Error("Function not implemented.");
 }

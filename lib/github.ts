@@ -34,6 +34,7 @@ type GitHubPushPayload = {
 export type GitHubIngestDoc = {
   text: string;
   source: string;
+  dedupeKey: string;
 };
 
 // ------------------------------------------------------------
@@ -118,18 +119,16 @@ export function payloadToDocuments(
     docs.push({
       text: formatCommit(commit, repoFullName),
       source: `github:${repoFullName}`,
+      dedupeKey: `commit:${commit.id}`,
     });
   }
 
   // Also add a "repo summary" document so the model knows the repo exists
   if (docs.length > 0) {
     docs.push({
-      text:
-        `Repository: ${repoFullName}` +
-        repoDescription +
-        repoLanguage +
-        `\nLatest activity: ${new Date().toISOString()}`,
+      text: `Repository: ${repoFullName}${repoDescription}${repoLanguage}`,
       source: `github:${repoFullName}`,
+      dedupeKey: `repo:${repoFullName}`,
     });
   }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { payloadToDocuments } from "@/lib/github";
-import { appendDocuments } from "@/lib/rag";
+import { appendDocumentsDeduped } from "@/lib/rag";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -76,11 +76,15 @@ export async function POST(req: Request) {
   }
 
   try {
-    const count = await appendDocuments(documents);
+    const result = await appendDocumentsDeduped(documents);
     console.log(
-      `[github-webhook] Ingested ${count} chunks from ${documents.length} docs`,
+      `[github-webhook] Ingested ${result.inserted} chunks (skipped ${result.skipped} already-stored docs) from ${documents.length} fetched`,
     );
-    return NextResponse.json({ ok: true, ingested: count });
+    return NextResponse.json({
+      ok: true,
+      ingested: result.inserted,
+      skipped: result.skipped,
+    });
   } catch (err) {
     console.error("[github-webhook] Ingestion failed:", err);
     return NextResponse.json(
