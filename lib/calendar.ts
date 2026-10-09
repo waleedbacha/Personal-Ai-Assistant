@@ -177,10 +177,10 @@ export async function fetchEvents(syncToken?: string): Promise<{
   if (syncToken) {
     params.set("syncToken", syncToken);
   } else {
-    // On first sync, only fetch events from the last 30 days
-    // and the next 365 days — avoids pulling years of history.
-    const timeMin = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const timeMax = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    // Minimal first-sync window: just the next 7 days.
+    // Keeps embedding volume small on the free Gemini tier.
+    const timeMin = new Date();
+    const timeMax = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     params.set("timeMin", timeMin.toISOString());
     params.set("timeMax", timeMax.toISOString());
     params.set("orderBy", "startTime");

@@ -93,7 +93,7 @@ export async function ingestDocuments(
     `[rag] Chunked ${documents.length} docs into ${allChunks.length} chunks`,
   );
 
-  const BATCH_SIZE = 50;
+  const BATCH_SIZE = 20;
   const embeddings: number[][] = [];
 
   for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
@@ -137,7 +137,7 @@ export async function appendDocuments(
 
   if (allChunks.length === 0) return 0;
 
-  const BATCH_SIZE = 50;
+  const BATCH_SIZE = 20;
   const embeddings: number[][] = [];
 
   for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
