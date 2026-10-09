@@ -21,11 +21,11 @@ function detectSourceFilter(query: string): RetrieveFilter | undefined {
   }
 
   if (githubKeywords.test(q)) {
-    // List your actual repos here
     return {
       githubRepos: [
         "github:waleedbacha/My-Drone-Force",
-        "github:waleedbacha/personal-ai-chatbot",
+        "github:waleedbacha/Personal-ai-chatbot",
+        "github:waleedbacha/Henry-Golatt-Portfolio",
       ],
     };
   }
