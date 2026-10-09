@@ -21,7 +21,13 @@ function detectSourceFilter(query: string): RetrieveFilter | undefined {
   }
 
   if (githubKeywords.test(q)) {
-    return { sourcePrefix: "github:" };
+    // List your actual repos here
+    return {
+      githubRepos: [
+        "github:waleedbacha/My-Drone-Force",
+        "github:waleedbacha/personal-ai-chatbot",
+      ],
+    };
   }
 
   return undefined;

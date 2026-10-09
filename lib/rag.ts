@@ -285,7 +285,7 @@ export type RetrievedChunk = {
 
 export type RetrieveFilter = {
   source?: string;
-  sourcePrefix?: string;
+  githubRepos?: string[];
 };
 
 export async function retrieve(
@@ -302,8 +302,8 @@ export async function retrieve(
 
   if (filter?.source) {
     atlasFilter = { source: { $eq: filter.source } };
-  } else if (filter?.sourcePrefix) {
-    atlasFilter = { source: { $regex: `^${filter.sourcePrefix}` } };
+  } else if (filter?.githubRepos && filter.githubRepos.length > 0) {
+    atlasFilter = { source: { $in: filter.githubRepos } };
   }
 
   const vectorSearchStage: Record<string, unknown> = {
