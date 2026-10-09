@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
   if (lastUserText) {
     try {
-      const chunks = await retrieve(lastUserText, 5);
+      const chunks = await retrieve(lastUserText, 8);
       if (chunks.length > 0) {
         retrievedContext = chunks
           .map(
