@@ -37,5 +37,12 @@ export async function getKnowledgeCollection(): Promise<Collection<Document>> {
   return db.collection(collectionName);
 }
 
+export async function getCollection<T extends Document>(
+  name: string,
+): Promise<Collection<T>> {
+  const db = await getDb();
+  return db.collection<T>(name);
+}
+
 export const KNOWLEDGE_COLLECTION = collectionName;
 export const VECTOR_INDEX_NAME = "vector_index";
