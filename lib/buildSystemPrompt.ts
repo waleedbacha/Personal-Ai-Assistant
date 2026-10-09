@@ -69,11 +69,21 @@ export function buildSystemPrompt(
 ): string {
   const p = persona;
   const modeOverlay = MODE_OVERLAYS[mode] ?? "";
-  const now = new Date().toISOString();
-  const nowHuman = new Date().toLocaleString("en-US", {
+  const nowUtc = new Date();
+  const nowPkt = new Date(
+    nowUtc.toLocaleString("en-US", { timeZone: "Asia/Karachi" }),
+  );
+
+  const now = nowUtc.toISOString();
+  const nowHuman = nowPkt.toLocaleString("en-US", {
     timeZone: "Asia/Karachi",
-    dateStyle: "full",
-    timeStyle: "long",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
   });
 
   const ragSection = retrievedContext.trim()
@@ -103,22 +113,25 @@ ${retrievedContext}
 ${modeOverlay}
 ${ragSection}
 
-============================================================
-CURRENT DATETIME
-============================================================
 
 ============================================================
-CURRENT DATETIME
+CURRENT DATETIME — READ CAREFULLY
 ============================================================
 
-ISO (UTC): ${now}
-Local time: ${nowHuman}
+Today is: ${nowHuman}
 Timezone: Asia/Karachi (UTC+5)
+UTC now: ${now}
 
-When the visitor says a time like "3pm today" or "tomorrow at 9am",
-they mean it in LOCAL time. Convert it to UTC before calling
-createReminder. Example: "3pm today" → today 15:00 local → today
-10:00 UTC → "2026-10-07T10:00:00.000Z".
+When the visitor says "today", "tomorrow", "yesterday", or names
+a day of the week, they mean it in LOCAL time (Asia/Karachi).
+Always answer about dates using the LOCAL date above.
+
+If a calendar event appears in the retrieved context, its date
+is absolute — do not re-interpret it. Report it as written.
+
+When the visitor says "3pm today", convert it to UTC before
+creating a reminder: "3pm today" → today 15:00 local → today
+10:00 UTC → "2026-10-09T10:00:00Z".
 
 ============================================================
 
