@@ -3,9 +3,29 @@ import { CHAT_MODEL } from "@/lib/ai";
 import { buildSystemPrompt, type ChatMode } from "@/lib/buildSystemPrompt";
 import { showContactForm } from "@/lib/contactTool";
 import { buildReminderTools } from "@/lib/reminderTool";
-import { retrieve } from "@/lib/rag";
+import { retrieve, type RetrieveFilter } from "@/lib/rag";
 
 export const maxDuration = 30;
+
+function detectSourceFilter(query: string): RetrieveFilter | undefined {
+  const q = query.toLowerCase();
+
+  const calendarKeywords =
+    /\b(event|events|calendar|schedule|meeting|meetings|zoom|appointment|appointments|booked|availability|available)\b/;
+
+  const githubKeywords =
+    /\b(commit|commits|push|pushed|repo|repos|repository|repositories|github)\b/;
+
+  if (calendarKeywords.test(q)) {
+    return { source: "google-calendar" };
+  }
+
+  if (githubKeywords.test(q)) {
+    return { sourcePrefix: "github:" };
+  }
+
+  return undefined;
+}
 
 export async function POST(req: Request) {
   const {
@@ -33,13 +53,15 @@ export async function POST(req: Request) {
       .trim() ?? "";
 
   // ------------------------------------------------------------
-  // 2. RAG retrieval
+  // 2. RAG retrieval — with source-aware filtering
   // ------------------------------------------------------------
   let retrievedContext = "";
 
   if (lastUserText) {
     try {
-      const chunks = await retrieve(lastUserText, 8);
+      const filter = detectSourceFilter(lastUserText);
+      const chunks = await retrieve(lastUserText, 5, filter);
+
       if (chunks.length > 0) {
         retrievedContext = chunks
           .map(
@@ -49,7 +71,17 @@ export async function POST(req: Request) {
               )})\n${c.text}`,
           )
           .join("\n\n---\n\n");
-        console.log(`[chat] Retrieved ${chunks.length} chunks`);
+        console.log(
+          `[chat] Retrieved ${chunks.length} chunks${
+            filter ? ` (filtered: ${JSON.stringify(filter)})` : ""
+          }`,
+        );
+      } else {
+        console.log(
+          `[chat] Retrieved 0 chunks${
+            filter ? ` (filtered: ${JSON.stringify(filter)})` : ""
+          }`,
+        );
       }
     } catch (err) {
       console.error("[chat] RAG retrieval failed:", err);
@@ -64,11 +96,6 @@ export async function POST(req: Request) {
 
   // ------------------------------------------------------------
   // 4. Stream with loop prevention
-  //
-  // stopWhen: stepCountIs(1) — allow exactly one model step:
-  //   either a text reply OR a tool call. The UI renders the
-  //   result directly from the tool part, so no follow-up step
-  //   is needed. This avoids Groq's multi-step tool loop bug.
   // ------------------------------------------------------------
   const result = streamText({
     model: CHAT_MODEL,

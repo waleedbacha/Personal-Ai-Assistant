@@ -283,25 +283,43 @@ export type RetrievedChunk = {
   score: number;
 };
 
+export type RetrieveFilter = {
+  source?: string;
+  sourcePrefix?: string;
+};
+
 export async function retrieve(
   query: string,
   topK: number = 5,
+  filter?: RetrieveFilter,
 ): Promise<RetrievedChunk[]> {
   if (!query.trim()) return [];
 
   const queryEmbedding = await embedOne(query);
   const collection = await getKnowledgeCollection();
 
+  let atlasFilter: Record<string, unknown> | undefined;
+
+  if (filter?.source) {
+    atlasFilter = { source: { $eq: filter.source } };
+  } else if (filter?.sourcePrefix) {
+    atlasFilter = { source: { $regex: `^${filter.sourcePrefix}` } };
+  }
+
+  const vectorSearchStage: Record<string, unknown> = {
+    index: VECTOR_INDEX_NAME,
+    path: "embedding",
+    queryVector: queryEmbedding,
+    numCandidates: Math.max(topK * 20, 100),
+    limit: topK,
+  };
+
+  if (atlasFilter) {
+    vectorSearchStage.filter = atlasFilter;
+  }
+
   const pipeline = [
-    {
-      $vectorSearch: {
-        index: VECTOR_INDEX_NAME,
-        path: "embedding",
-        queryVector: queryEmbedding,
-        numCandidates: Math.max(topK * 20, 100),
-        limit: topK,
-      },
-    },
+    { $vectorSearch: vectorSearchStage },
     {
       $project: {
         _id: 0,
