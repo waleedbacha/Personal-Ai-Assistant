@@ -4,6 +4,7 @@ import { buildSystemPrompt, type ChatMode } from "@/lib/buildSystemPrompt";
 import { showContactForm } from "@/lib/contactTool";
 import { buildReminderTools } from "@/lib/reminderTool";
 import { retrieve, type RetrieveFilter } from "@/lib/rag";
+import { getRecentCommitsTool } from "@/lib/commitTool";
 
 export const maxDuration = 30;
 
@@ -109,6 +110,7 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     tools: {
       showContactForm,
+      getRecentCommits: getRecentCommitsTool,
       ...reminderTools,
     },
     temperature: 0.7,

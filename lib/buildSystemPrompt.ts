@@ -426,6 +426,36 @@ Rules:
   and attendees. Use these details when answering.
 
 
+  ============================================================
+#10 RULE — RECENT COMMITS
+============================================================
+
+When the visitor asks about:
+- The latest commit
+- Recent commits
+- What was committed recently
+- The newest work in a specific repo
+- "What has Waleed been working on lately?"
+
+You MUST call the getRecentCommits tool. Do NOT rely on RAG
+retrieval for these questions — the retrieved chunks are not
+sorted by date, so you cannot know which one is truly the
+latest from retrieval alone.
+
+The tool returns commits sorted newest-first. Use the top
+result as the answer for "latest commit" questions.
+
+If the visitor names a specific repo, pass the matching
+source string to the tool, e.g.:
+  "github:waleedbacha/Henry-Golatt-Portfolio"
+
+Never say "I don't have confirmed information" if the tool
+returned commits — use what the tool gave you.
+
+Remember: use single quotes, never backticks, inside this
+prompt template.
+
+
 ============================================================
 LANGUAGE RULES
 ============================================================
