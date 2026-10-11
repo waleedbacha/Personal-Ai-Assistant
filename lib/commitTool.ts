@@ -21,42 +21,51 @@ export const getRecentCommitsTool = tool({
       .number()
       .int()
       .min(1)
-      .max(20)
+      .max(10)
       .optional()
       .describe("How many recent commits to fetch. Default 5."),
   }),
   execute: async ({ source, limit }) => {
     try {
+      const finalLimit = limit ?? 5;
+
+      // Fetch extra to allow for filtering out empty/invalid chunks
       const commits = await getRecentCommits({
         source,
-        limit: (limit ?? 5) * 2, // fetch extra to allow for filtering
+        limit: finalLimit * 2,
       });
 
+      // Compact form — ~40 tokens per commit instead of ~200
       const compact = commits
         .map((c) => {
           const lines = c.text.split("\n");
+
+          const getField = (prefix: string) => {
+            const line = lines.find((l) => l.startsWith(prefix));
+            return line ? line.slice(prefix.length).trim() : "";
+          };
+
+          const messageIdx = lines.findIndex((l) => l.trim() === "Message:");
+          const message =
+            messageIdx >= 0 && lines[messageIdx + 1]
+              ? lines[messageIdx + 1].trim()
+              : "";
+
           return {
-            repo:
-              lines
-                .find((l) => l.startsWith("Repository:"))
-                ?.replace("Repository: ", "") ?? "",
-            sha:
-              lines
-                .find((l) => l.startsWith("Commit:"))
-                ?.replace("Commit: ", "") ?? "",
-            date:
-              lines.find((l) => l.startsWith("Date:"))?.replace("Date: ", "") ??
-              "",
-            message:
-              lines[
-                lines.findIndex((l) => l.trim() === "Message:") + 1
-              ]?.trim() ?? "",
+            repo: getField("Repository:"),
+            sha: getField("Commit:"),
+            date: getField("Date:"),
+            message,
           };
         })
-        .filter((c) => c.sha && c.message) // drop empty/invalid entries
-        .slice(0, limit ?? 5);
+        .filter((c) => c.sha && c.message)
+        .slice(0, finalLimit);
 
-      return { ok: true, count: compact.length, commits: compact };
+      return {
+        ok: true,
+        count: compact.length,
+        commits: compact,
+      };
     } catch (err) {
       console.error("[commit-tool] failed:", err);
       return { ok: false, error: "Could not fetch commits." };

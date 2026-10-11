@@ -3,25 +3,21 @@ import { CHAT_MODEL } from "@/lib/ai";
 import { buildSystemPrompt, type ChatMode } from "@/lib/buildSystemPrompt";
 import { showContactForm } from "@/lib/contactTool";
 import { buildReminderTools } from "@/lib/reminderTool";
-import { retrieve, type RetrieveFilter } from "@/lib/rag";
 import { getRecentCommitsTool } from "@/lib/commitTool";
-import { getCalendarEventsTool } from "@/lib/calendar-tool";
+import { retrieve, type RetrieveFilter } from "@/lib/rag";
 
-export const maxDuration = 50;
+export const maxDuration = 60;
 
 function detectSourceFilter(query: string): RetrieveFilter | undefined {
   const q = query.toLowerCase();
 
-  const calendarKeywords =
-    /\b(event|events|calendar|schedule|meeting|meetings|zoom|appointment|appointments|booked|availability|available)\b/;
-
   const githubKeywords =
-    /\b(commit|commits|push|pushed|repo|repos|repository|repositories|github)\b/;
+    /\b(commit|commits|push|pushed|repo|repos|repository|repositories|github|latest|recent)\b/;
 
-  if (calendarKeywords.test(q)) {
-    return { source: "google-calendar" };
-  }
+  const calendarKeywords =
+    /\b(event|events|calendar|schedule|meeting|meetings|zoom|appointment|appointments|booked|availability|available|week|month|today|tomorrow|yesterday|upcoming)\b/;
 
+  // GitHub first — "commit this week" should route to commits, not calendar
   if (githubKeywords.test(q)) {
     return {
       githubRepos: [
@@ -30,6 +26,10 @@ function detectSourceFilter(query: string): RetrieveFilter | undefined {
         "github:waleedbacha/Henry-Golatt-Portfolio",
       ],
     };
+  }
+
+  if (calendarKeywords.test(q)) {
+    return { source: "google-calendar" };
   }
 
   return undefined;
@@ -61,14 +61,14 @@ export async function POST(req: Request) {
       .trim() ?? "";
 
   // ------------------------------------------------------------
-  // 2. RAG retrieval — with source-aware filtering
+  // 2. RAG retrieval — 3 chunks (was 5) for tighter answers
   // ------------------------------------------------------------
   let retrievedContext = "";
 
   if (lastUserText) {
     try {
       const filter = detectSourceFilter(lastUserText);
-      const chunks = await retrieve(lastUserText, 5, filter);
+      const chunks = await retrieve(lastUserText, 3, filter);
 
       if (chunks.length > 0) {
         retrievedContext = chunks
@@ -97,21 +97,27 @@ export async function POST(req: Request) {
   }
 
   // ------------------------------------------------------------
-  // 3. System prompt + tools
+  // 3. Build prompt + tools
   // ------------------------------------------------------------
   const systemPrompt = buildSystemPrompt(mode, retrievedContext);
   const reminderTools = buildReminderTools(visitorId);
 
   // ------------------------------------------------------------
-  // 4. Stream with loop prevention
+  // 4. Only send the last 4 messages to the model.
+  //    This prevents old answers from bleeding into new ones
+  //    and keeps the request smaller.
+  // ------------------------------------------------------------
+  const recentMessages = messages.slice(-4);
+
+  // ------------------------------------------------------------
+  // 5. Stream with 2 steps (tool call + reply)
   // ------------------------------------------------------------
   const result = streamText({
     model: CHAT_MODEL,
     system: systemPrompt,
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(recentMessages),
     tools: {
       showContactForm,
-      getCalendarEvents: getCalendarEventsTool,
       getRecentCommits: getRecentCommitsTool,
       ...reminderTools,
     },
