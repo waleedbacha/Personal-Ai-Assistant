@@ -6,6 +6,6 @@ export const groq = createOpenAI({
 });
 
 // Fast, smart, free — great for a personal chatbot
-export const CHAT_MODEL = groq("llama-3.3-70b-versatile");
+export const CHAT_MODEL = groq("openai/gpt-oss-20b");
 
 // "openai/gpt-oss-120b";
