@@ -5,6 +5,7 @@ import { showContactForm } from "@/lib/contactTool";
 import { buildReminderTools } from "@/lib/reminderTool";
 import { getRecentCommitsTool } from "@/lib/commitTool";
 import { retrieve, type RetrieveFilter } from "@/lib/rag";
+import { getCalendarEventsTool } from "@/lib/calendar-tool";
 
 export const maxDuration = 60;
 
@@ -119,6 +120,7 @@ export async function POST(req: Request) {
     tools: {
       showContactForm,
       getRecentCommits: getRecentCommitsTool,
+      getCalendarEvents: getCalendarEventsTool,
       ...reminderTools,
     },
     temperature: 0.7,
