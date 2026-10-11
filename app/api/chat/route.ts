@@ -114,7 +114,7 @@ export async function POST(req: Request) {
       ...reminderTools,
     },
     temperature: 0.7,
-    stopWhen: stepCountIs(2),
+    stopWhen: stepCountIs(1),
     providerOptions: {
       groq: {
         reasoning_effort: "low",

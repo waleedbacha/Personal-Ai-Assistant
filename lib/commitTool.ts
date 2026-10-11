@@ -32,13 +32,32 @@ export const getRecentCommitsTool = tool({
         limit: limit ?? 5,
       });
 
+      // Compact format — ~40 tokens per commit instead of ~200
+      const compact = commits.map((c) => {
+        // Extract just the key fields from the chunk text
+        const lines = c.text.split("\n");
+        const repo =
+          lines
+            .find((l) => l.startsWith("Repository:"))
+            ?.replace("Repository: ", "") ?? "";
+        const sha =
+          lines.find((l) => l.startsWith("Commit:"))?.replace("Commit: ", "") ??
+          "";
+        const date =
+          lines.find((l) => l.startsWith("Date:"))?.replace("Date: ", "") ?? "";
+        const messageIdx = lines.findIndex((l) => l.trim() === "Message:");
+        const message =
+          messageIdx >= 0 && lines[messageIdx + 1]
+            ? lines[messageIdx + 1].trim()
+            : "";
+
+        return { repo, sha, date, message };
+      });
+
       return {
         ok: true,
-        count: commits.length,
-        commits: commits.map((c) => ({
-          source: c.source,
-          text: c.text,
-        })),
+        count: compact.length,
+        commits: compact,
       };
     } catch (err) {
       console.error("[commit-tool] failed:", err);

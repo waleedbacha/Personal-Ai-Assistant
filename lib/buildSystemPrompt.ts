@@ -526,104 +526,23 @@ Don't end every reply with "Let me know if you'd like more details."
 (Only do this for open bio answers.)
 
 ============================================================
-WALEED'S PROFILE (KNOWLEDGE BASE)
+CORE IDENTITY (ALWAYS KNOWN)
 ============================================================
 
---- IDENTITY ---
 Full name: ${p.name}
 Preferred name: ${p.preferredName}
 Role: ${p.role}
 Location: ${p.location.full}
 
---- ABOUT ---
-${p.about}
-
---- EDUCATION ---
-${p.education
-  .map(
-    (e) =>
-      `- ${e.institution}${e.level ? ` (${e.level})` : ""}${
-        e.degree ? ` — ${e.degree}` : ""
-      }${e.period ? ` [${e.period}]` : ""}${
-        e.achievement ? ` — ${e.achievement}` : ""
-      }${e.cgpa ? ` — CGPA ${e.cgpa}` : ""}`,
-  )
-  .join("\n")}
-
---- CAREER ---
-${p.experience
-  .map(
-    (e) =>
-      `- ${e.role} at ${e.company}${e.location ? ` (${e.location})` : ""}${
-        e.period ? ` — ${e.period}` : ""
-      }${e.current ? " [CURRENT]" : ""}\n  ${e.summary}${
-        e.project
-          ? `\n  Project: ${e.project.name} — ${e.project.description}\n  Features: ${e.project.features.join(", ")}`
-          : ""
-      }`,
-  )
-  .join("\n\n")}
-
---- TECHNICAL SKILLS ---
-Frontend: ${p.skills.frontend.join(", ")}
-Backend: ${p.skills.backend.join(", ")}
-Databases: ${p.skills.database.join(", ")}
-Tools & Technologies: ${p.skills.tools.join(", ")}
-Deployment / Hosting: ${p.skills.deployment.join(", ")}
-
---- SOFT SKILLS ---
-${p.softSkills.join(", ")}
-
---- SERVICES ---
-${p.services.map((s) => `- ${s}`).join("\n")}
-
---- PROJECTS ---
-${p.projects
-  .map(
-    (pr) =>
-      `• ${pr.name} [${pr.category}]\n  ${pr.description}${
-        pr.link ? `\n  URL: ${pr.link}` : ""
-      }${pr.status ? `\n  Status: ${pr.status}` : ""}${
-        pr.ownedBy ? `\n  Owned by: ${pr.ownedBy}` : ""
-      }${pr.features ? `\n  Features: ${pr.features.join(", ")}` : ""}${
-        pr.stack ? `\n  Stack: ${pr.stack.join(", ")}` : ""
-      }`,
-  )
-  .join("\n\n")}
-
---- CERTIFICATIONS ---
-${p.certifications
-  .map(
-    (c) =>
-      `- ${c.name} — ${c.provider} (${c.issued})${
-        c.area ? ` — ${c.area}` : ""
-      }`,
-  )
-  .join("\n")}
-
---- ENTREPRENEURSHIP ---
-${p.ventures
-  .map(
-    (v) =>
-      `- ${v.name} (${v.type}) — ${v.status}\n  ${v.description}\n  URL: ${v.url}\n  Owned by: ${v.ownedBy}`,
-  )
-  .join("\n\n")}
-
---- CLIENTS ---
-${p.clients
-  .map(
-    (c) =>
-      `- ${c.name} (${c.country}) — ${c.role}\n  Collaboration: ${c.collaboration.join(", ")}\n  Organization: ${c.organization}`,
-  )
-  .join("\n\n")}
-
---- PROJECT URLS ---
 Portfolio: ${p.projectUrls.portfolio}
-HAMAMA: ${p.projectUrls.hamama}
-Drones Directory: ${p.projectUrls.dronesDirectory}
-Elegance Perfumes: ${p.projectUrls.elegance}
 LinkedIn: ${p.projectUrls.linkedin}
 Email: waleedbadshah@gmail.com
+
+Everything else about Waleed (education, career, projects,
+skills, certifications, clients, ventures) lives in the
+retrieved knowledge base context. Use that context when
+answering questions about him. Do NOT invent details that
+aren't in the retrieved context.
 
 ============================================================
 FINAL SELF-CHECK BEFORE EVERY REPLY
