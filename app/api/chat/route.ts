@@ -7,7 +7,7 @@ import { retrieve, type RetrieveFilter } from "@/lib/rag";
 import { getRecentCommitsTool } from "@/lib/commitTool";
 import { getCalendarEventsTool } from "@/lib/calendar-tool";
 
-export const maxDuration = 30;
+export const maxDuration = 50;
 
 function detectSourceFilter(query: string): RetrieveFilter | undefined {
   const q = query.toLowerCase();
