@@ -29,36 +29,34 @@ export const getRecentCommitsTool = tool({
     try {
       const commits = await getRecentCommits({
         source,
-        limit: limit ?? 5,
+        limit: (limit ?? 5) * 2, // fetch extra to allow for filtering
       });
 
-      // Compact format — ~40 tokens per commit instead of ~200
-      const compact = commits.map((c) => {
-        // Extract just the key fields from the chunk text
-        const lines = c.text.split("\n");
-        const repo =
-          lines
-            .find((l) => l.startsWith("Repository:"))
-            ?.replace("Repository: ", "") ?? "";
-        const sha =
-          lines.find((l) => l.startsWith("Commit:"))?.replace("Commit: ", "") ??
-          "";
-        const date =
-          lines.find((l) => l.startsWith("Date:"))?.replace("Date: ", "") ?? "";
-        const messageIdx = lines.findIndex((l) => l.trim() === "Message:");
-        const message =
-          messageIdx >= 0 && lines[messageIdx + 1]
-            ? lines[messageIdx + 1].trim()
-            : "";
+      const compact = commits
+        .map((c) => {
+          const lines = c.text.split("\n");
+          return {
+            repo:
+              lines
+                .find((l) => l.startsWith("Repository:"))
+                ?.replace("Repository: ", "") ?? "",
+            sha:
+              lines
+                .find((l) => l.startsWith("Commit:"))
+                ?.replace("Commit: ", "") ?? "",
+            date:
+              lines.find((l) => l.startsWith("Date:"))?.replace("Date: ", "") ??
+              "",
+            message:
+              lines[
+                lines.findIndex((l) => l.trim() === "Message:") + 1
+              ]?.trim() ?? "",
+          };
+        })
+        .filter((c) => c.sha && c.message) // drop empty/invalid entries
+        .slice(0, limit ?? 5);
 
-        return { repo, sha, date, message };
-      });
-
-      return {
-        ok: true,
-        count: compact.length,
-        commits: compact,
-      };
+      return { ok: true, count: compact.length, commits: compact };
     } catch (err) {
       console.error("[commit-tool] failed:", err);
       return { ok: false, error: "Could not fetch commits." };
