@@ -5,6 +5,7 @@ import { showContactForm } from "@/lib/contactTool";
 import { buildReminderTools } from "@/lib/reminderTool";
 import { retrieve, type RetrieveFilter } from "@/lib/rag";
 import { getRecentCommitsTool } from "@/lib/commitTool";
+import { getCalendarEventsTool } from "@/lib/calendar-tool";
 
 export const maxDuration = 30;
 
@@ -110,6 +111,7 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     tools: {
       showContactForm,
+      getCalendarEvents: getCalendarEventsTool,
       getRecentCommits: getRecentCommitsTool,
       ...reminderTools,
     },

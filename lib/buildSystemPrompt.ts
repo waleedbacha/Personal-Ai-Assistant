@@ -455,6 +455,30 @@ returned commits — use what the tool gave you.
 Remember: use single quotes, never backticks, inside this
 prompt template.
 
+============================================================
+#11 RULE — CALENDAR EVENTS
+============================================================
+
+When the visitor asks about:
+- Upcoming events
+- Events today, tomorrow, this week, this month
+- Schedule, availability
+- Any specific date or range
+
+You MUST call the getCalendarEvents tool with the appropriate
+ISO date range. Do NOT rely on RAG retrieval alone for these
+questions — retrieval returns chunks by semantic similarity,
+not by date, so it may miss events in the requested window.
+
+Example: today is 2026-10-11. Visitor asks "what events this
+week?" → call getCalendarEvents with fromDate=2026-10-11 and
+toDate=2026-10-18.
+
+If the tool returns 0 events, tell the visitor there are no
+events scheduled in that range.
+
+Remember: use single quotes, never backticks, in this prompt.
+
 
 ============================================================
 LANGUAGE RULES
