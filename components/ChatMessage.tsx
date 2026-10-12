@@ -8,6 +8,7 @@ import { ProjectCards } from "./ProjectCards";
 import { Markdown } from "./Markdown";
 import { ContactForm } from "./ContactForm";
 import { ReminderConfirmation } from "./ReminderConfirmation";
+import { useThinkingMessages } from "@/hooks/useThinkingMessages";
 
 type Props = {
   message: UIMessage;
@@ -254,30 +255,20 @@ export function ChatMessage({
 /* ============================================================
    Typing indicator
    ============================================================ */
-function TypingDots() {
+function TypingDots({
+  hint,
+}: {
+  hint?: "persona" | "calendar" | "commits" | "generic";
+}) {
+  const message = useThinkingMessages({ isLoading: true, hint });
+
   return (
-    <span className="inline-flex h-5 items-center gap-1">
-      <span
-        className="h-1.5 w-1.5 rounded-full bg-muted"
-        style={{
-          animation: "dotPulse 1.2s infinite ease-in-out",
-          animationDelay: "0s",
-        }}
-      />
-      <span
-        className="h-1.5 w-1.5 rounded-full bg-muted"
-        style={{
-          animation: "dotPulse 1.2s infinite ease-in-out",
-          animationDelay: "0.15s",
-        }}
-      />
-      <span
-        className="h-1.5 w-1.5 rounded-full bg-muted"
-        style={{
-          animation: "dotPulse 1.2s infinite ease-in-out",
-          animationDelay: "0.3s",
-        }}
-      />
+    <span className="inline-flex items-center gap-2 text-sm text-muted/80">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+      </span>
+      <span className="italic">{message}</span>
     </span>
   );
 }
