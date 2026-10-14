@@ -11,21 +11,19 @@ type View = "menu" | "reminders" | "history";
 type Props = {
   open: boolean;
   onClose: () => void;
-  // Reminders
   reminders: Reminder[];
   remindersLoading: boolean;
   remindersError: string | null;
   dueCount: number;
   onCompleteReminder: (id: string) => void;
   onDeleteReminder: (id: string) => void;
-  // History
   sessions: ChatSession[];
   activeSessionId: string | null;
   onSelectSession: (id: string) => void;
   onDeleteSession: (id: string) => void;
   onClearAllSessions: () => void;
-  // Actions
   onNewChat: () => void;
+  onOpenWeeklyReport: () => void;
 };
 
 export function SideMenu({
@@ -43,15 +41,14 @@ export function SideMenu({
   onDeleteSession,
   onClearAllSessions,
   onNewChat,
+  onOpenWeeklyReport,
 }: Props) {
   const [view, setView] = useState<View>("menu");
 
-  // Reset to root menu when the drawer closes
   useEffect(() => {
     if (!open) setView("menu");
   }, [open]);
 
-  // Escape closes
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -61,7 +58,6 @@ export function SideMenu({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Lock body scroll while open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -73,7 +69,6 @@ export function SideMenu({
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         aria-hidden="true"
@@ -82,7 +77,6 @@ export function SideMenu({
         }`}
       />
 
-      {/* Drawer — slides in from the right */}
       <aside
         role="dialog"
         aria-label="Menu"
@@ -91,7 +85,6 @@ export function SideMenu({
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Header */}
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           {view !== "menu" ? (
             <button
@@ -120,7 +113,6 @@ export function SideMenu({
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto">
           {view === "menu" && (
             <nav className="flex flex-col p-2">
@@ -154,6 +146,22 @@ export function SideMenu({
                 {sessions.length > 0 && (
                   <span className="text-xs text-muted">{sessions.length}</span>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenWeeklyReport();
+                }}
+                className="flex items-center justify-between rounded-xl border border-transparent px-4 py-3 text-left transition-colors hover:border-border hover:bg-bg-soft/60"
+              >
+                <span className="flex items-center gap-3">
+                  <ReportIcon />
+                  <span className="text-sm font-medium text-fg">
+                    Weekly report
+                  </span>
+                </span>
               </button>
 
               <div className="mx-4 my-2 h-px bg-border" />
@@ -270,6 +278,26 @@ function HistoryIcon() {
       <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
       <polyline points="3 3 3 8 8 8" />
       <polyline points="12 7 12 12 15 14" />
+    </svg>
+  );
+}
+
+function ReportIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
   );
 }

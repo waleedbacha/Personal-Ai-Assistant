@@ -8,6 +8,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { ModeChips } from "@/components/ModeChips";
 import { SideMenu } from "@/components/SideMenu";
+import { WeeklyReportModal } from "@/components/WeeklyReportModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useChatHistory } from "@/hooks/useChatHistory";
@@ -26,8 +27,6 @@ export default function Home() {
     stop: stopTts,
   } = useSpeechSynthesis();
 
-  const { tap: hapticTap } = useHapticsSafe();
-
   const speakRef = useRef(speak);
   useEffect(() => {
     speakRef.current = speak;
@@ -35,6 +34,7 @@ export default function Home() {
 
   const langQueueRef = useRef<string[]>([]);
   const [mode, setMode] = useState<ChatMode>("default");
+  const [weeklyReportOpen, setWeeklyReportOpen] = useState(false);
 
   // ---------- Visitor + reminders ----------
   const visitorId = useVisitorId();
@@ -65,8 +65,6 @@ export default function Home() {
   const { messages, sendMessage, status, setMessages, regenerate, stop } =
     useChat({
       onFinish: ({ message }) => {
-        hapticTap?.();
-
         const raw =
           message.parts
             ?.filter((p: any) => p.type === "text")
@@ -77,7 +75,6 @@ export default function Home() {
         const lang = langQueueRef.current.shift() ?? "en";
         if (spoken) speakRef.current(spoken, lang);
 
-        // Refresh reminders — the assistant may have created one
         refreshReminders();
       },
     });
@@ -94,7 +91,6 @@ export default function Home() {
   // ---------- Send / regenerate ----------
   const handleSend = useCallback(
     (text: string) => {
-      hapticTap?.();
       const lang = detectLanguage(text);
       langQueueRef.current.push(lang);
       sendMessage(
@@ -104,7 +100,6 @@ export default function Home() {
         },
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sendMessage, visitorId],
   );
 
@@ -274,19 +269,13 @@ export default function Home() {
         onDeleteSession={handleDeleteSession}
         onClearAllSessions={handleClearAll}
         onNewChat={handleNewChat}
+        onOpenWeeklyReport={() => setWeeklyReportOpen(true)}
+      />
+
+      <WeeklyReportModal
+        open={weeklyReportOpen}
+        onClose={() => setWeeklyReportOpen(false)}
       />
     </main>
   );
-}
-
-// Fallback in case useHaptics isn't installed yet
-function useHapticsSafe() {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require("@/hooks/useHaptics");
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return mod.useHaptics();
-  } catch {
-    return { tap: () => {}, double: () => {} };
-  }
 }

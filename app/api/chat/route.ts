@@ -6,6 +6,7 @@ import { buildReminderTools } from "@/lib/reminderTool";
 import { getRecentCommitsTool } from "@/lib/commitTool";
 import { getCalendarEventsTool } from "@/lib/calendar-tool";
 import { retrieve, type RetrieveFilter } from "@/lib/rag";
+import { logConversation } from "@/lib/conversations";
 import {
   classifyRequest,
   shouldRetrieve,
@@ -57,14 +58,7 @@ export async function POST(req: Request) {
 
   if (needsRetrieval && lastUserText) {
     try {
-      // Determine filter based on category
-      let filter: RetrieveFilter | undefined;
-
-      if (category === "projectQuestion") {
-        // No filter — search all sources
-        filter = undefined;
-      }
-
+      const filter: RetrieveFilter | undefined = undefined;
       const chunks = await retrieve(lastUserText, 3, filter);
 
       if (chunks.length > 0) {
@@ -85,7 +79,7 @@ export async function POST(req: Request) {
   const reminderTools = buildReminderTools(visitorId);
 
   // ------------------------------------------------------------
-  // 5. Trim history — THIS is what fixes the answer bleeding
+  // 5. Trim history — this fixes the answer-bleed problem
   // ------------------------------------------------------------
   const recentMessages = messages.slice(-depth);
 
@@ -111,6 +105,33 @@ export async function POST(req: Request) {
       },
     },
   });
+
+  // ------------------------------------------------------------
+  // 7. Log the conversation after the stream finishes
+  //    Fire-and-forget — don't block the response.
+  // ------------------------------------------------------------
+  // 7. Log the conversation after the stream finishes
+  //    Fire-and-forget — don't block the response.
+  // ------------------------------------------------------------
+  if (lastUserText && category !== "smallTalk") {
+    const currentMessages = [...recentMessages];
+
+    Promise.resolve(result.text)
+      .then((finalText) => {
+        if (!finalText || typeof finalText !== "string") return;
+        if (finalText.length < 5) return;
+        return logConversation({
+          visitorId,
+          question: lastUserText.slice(0, 500),
+          answerSummary: finalText.slice(0, 300),
+          category,
+          createdAt: new Date().toISOString(),
+        });
+      })
+      .catch(() => {
+        // Silent — logging failures must never affect the response
+      });
+  }
 
   return result.toUIMessageStreamResponse();
 }

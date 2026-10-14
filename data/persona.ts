@@ -1,11 +1,10 @@
-
 export const persona = {
   // ============================================================
   // IDENTITY
   // ============================================================
   name: "Waleed Badshah",
   preferredName: "Waleed",
-  role: "Full-Stack MERN Developer & Software Developer",
+  role: "Full-Stack Software Developer",
   eyebrow: "Digital Web Solutions Provider",
   eyebrowColor: "#3b82f6",
   tagline:
@@ -23,7 +22,7 @@ export const persona = {
   // ABOUT
   // ============================================================
   about: `
-    Waleed Badshah is a Full-Stack Web Developer and Software Developer
+    Waleed Badshah is a Full-Stack Software Developer
     based in Islamabad, Pakistan. He holds a BS in Information Technology
     from the University of Malakand (2020–2024, CGPA 3.79) and currently
     works at Deister Software as a Software Developer, contributing to
@@ -77,7 +76,7 @@ export const persona = {
   experience: [
     {
       company: "Deister Software",
-      role: "Software Developer",
+      role: "Full-Stack Software Developer",
       location: "Pakistan",
       period: "November 2025 – Present",
       current: true,
@@ -100,11 +99,11 @@ export const persona = {
     },
     {
       company: "Code Alpha",
-      role: "Full MERN Stack Developer",
+      role: "Full Stack Software Developer",
       location: "Remote",
       period: "March 2025 – August 2025",
       summary:
-        "Worked as a MERN Stack Developer focusing on efficient, scalable and user-friendly web applications. Responsibilities included React.js, Node.js, Express.js and MongoDB development, responsive web applications, RESTful APIs, JWT authentication, authorization, API optimization, testing, debugging, deployment and performance improvements.",
+        "Worked as a Software Stack Developer focusing on efficient, scalable and user-friendly web applications. Responsibilities included React.js, Node.js, Express.js and MongoDB development, responsive web applications, RESTful APIs, JWT authentication, authorization, API optimization, testing, debugging, deployment and performance improvements.",
     },
     {
       company: "TechSol Labs Pakistan",
