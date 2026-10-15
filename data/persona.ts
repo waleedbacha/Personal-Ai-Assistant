@@ -7,8 +7,7 @@ export const persona = {
   role: "Full-Stack Software Developer",
   eyebrow: "Digital Web Solutions Provider",
   eyebrowColor: "#3b82f6",
-  tagline:
-    "Creating stunning digital experiences with modern web technologies.",
+  tagline: "Your Life, Your Work, Your AI.",
   logo: "/logo.png",
   avatar: "/avatar.jpg",
 
