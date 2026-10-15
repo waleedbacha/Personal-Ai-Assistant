@@ -13,27 +13,29 @@ export function WeeklyReportPanel() {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    let cancelled = false;
-
     async function load() {
       try {
         console.log("[weekly-report-panel] Fetching…");
         const res = await fetch("/api/weekly-report", { cache: "no-store" });
-        console.log("[weekly-report-panel] Response status:", res.status);
+
+        console.log("[weekly-report-panel] status:", res.status);
+
+        if (!res.ok) {
+          console.error("[weekly-report-panel] Bad status:", res.status);
+          setError(`Server error: ${res.status}`);
+          setIsLoading(false);
+          return;
+        }
 
         const data = await res.json();
+        console.log("[weekly-report-panel] keys:", Object.keys(data));
         console.log(
-          "[weekly-report-panel] Data keys:",
-          Object.keys(data),
-          "report length:",
-          data.report?.length ?? 0,
+          "[weekly-report-panel] report length:",
+          typeof data.report === "string" ? data.report.length : "NOT A STRING",
         );
 
-        if (cancelled) return;
-
-        if (!res.ok || !data.ok || typeof data.report !== "string") {
-          console.error("[weekly-report-panel] Bad response:", data);
-          setError(data.error || "Invalid response from server.");
+        if (!data.ok || typeof data.report !== "string") {
+          setError(data.error || "Invalid response.");
           setIsLoading(false);
           return;
         }
@@ -41,7 +43,6 @@ export function WeeklyReportPanel() {
         setReport(data.report);
         setIsLoading(false);
       } catch (err) {
-        if (cancelled) return;
         console.error("[weekly-report-panel] Fetch error:", err);
         setError("Network error. Try again later.");
         setIsLoading(false);
@@ -49,10 +50,6 @@ export function WeeklyReportPanel() {
     }
 
     load();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   if (isLoading) {
@@ -86,7 +83,7 @@ export function WeeklyReportPanel() {
 
   return (
     <div className="markdown-body px-4 py-4 text-sm leading-relaxed text-fg">
-      <pre className="whitespace-pre-wrap">{report}</pre>
+      <Markdown>{report}</Markdown>
     </div>
   );
 }

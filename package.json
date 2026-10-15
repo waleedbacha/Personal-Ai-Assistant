@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/google": "^3.0.130",
     "@ai-sdk/openai": "^4.0.84",
+    "@ai-sdk/openai-compatible": "^2.0.83",
     "@ai-sdk/react": "^4.0.129",
     "ai": "^7.0.126",
     "mongodb": "^6.21.0",
