@@ -4,7 +4,7 @@ export const persona = {
   // ============================================================
   name: "Waleed Badshah",
   preferredName: "Waleed",
-  role: "Full-Stack Software Developer",
+  role: "Full-Stack Web Engineer",
   eyebrow: "Digital Web Solutions Provider",
   eyebrowColor: "#3b82f6",
   tagline: "Your Life, Your Work, Your AI.",

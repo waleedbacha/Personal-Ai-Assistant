@@ -17,7 +17,7 @@ import { useReminders } from "@/hooks/useReminders";
 import { detectLanguage } from "@/lib/detectLanguage";
 import { parseCardMarker } from "@/lib/cardMarkers";
 import type { ChatMode } from "@/lib/buildSystemPrompt";
-
+import { WelcomeModal } from "@/components/WelcomeModal";
 export default function Home() {
   const {
     isSupported: isSpeechSupported,
@@ -64,6 +64,40 @@ export default function Home() {
   // ---------- Chat ----------
   const { messages, sendMessage, status, setMessages, regenerate, stop } =
     useChat({
+      onError: (error) => {
+        try {
+          // Parse the JSON response from our API route (403 demo limit)
+          const parsed = JSON.parse(error.message);
+          if (parsed.error) {
+            // Inject the limit message as an assistant reply
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: parsed.error,
+                parts: [{ type: "text", text: parsed.error }],
+              },
+            ]);
+            return;
+          }
+        } catch {
+          // Not a JSON error, fall through
+        }
+
+        // Generic error fallback
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: "An error occurred. Please try again.",
+            parts: [
+              { type: "text", text: "An error occurred. Please try again." },
+            ],
+          },
+        ]);
+      },
       onFinish: ({ message }) => {
         const raw =
           message.parts
@@ -276,6 +310,7 @@ export default function Home() {
         open={weeklyReportOpen}
         onClose={() => setWeeklyReportOpen(false)}
       />
+       <WelcomeModal />
     </main>
   );
 }

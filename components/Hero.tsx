@@ -147,7 +147,7 @@ export function Hero({
 
         {/* Footer hint */}
         <p className="animate-fade-in stagger-7 mt-12 text-xs text-muted/60">
-          Powered by WB · {persona.role}
+          © {new Date().getFullYear()} WB · {persona.role}
         </p>
       </div>
 

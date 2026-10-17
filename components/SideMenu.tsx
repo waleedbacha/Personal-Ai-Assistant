@@ -5,6 +5,7 @@ import type { ChatSession } from "@/hooks/useChatHistory";
 import type { Reminder } from "@/lib/reminders";
 import { HistoryPanel } from "./HistoryPanel";
 import { RemindersPanel } from "./RemindersPanel";
+import Link from "next/link";
 
 type View = "menu" | "reminders" | "history";
 
@@ -148,7 +149,8 @@ export function SideMenu({
                 )}
               </button>
 
-              <button
+              {/* ENABLE BUTTON */}
+              {/* <button
                 type="button"
                 onClick={() => {
                   onClose();
@@ -162,8 +164,35 @@ export function SideMenu({
                     Weekly report
                   </span>
                 </span>
+              </button> */}
+
+              {/* DISABLED BUTTON */}
+              <button
+                type="button"
+                disabled={true} // Locked permanently for demo
+                className="flex cursor-not-allowed items-center justify-between rounded-xl border border-transparent px-4 py-3 text-left opacity-40"
+              >
+                <span className="flex items-center gap-3">
+                  <ReportIcon />
+                  <span className="text-sm font-medium text-fg">
+                    Weekly report
+                    <span className="ml-2 text-[10px] uppercase tracking-wide text-muted/60">
+                      (No weekly report found)
+                    </span>
+                  </span>
+                </span>
               </button>
 
+              {/* <Link
+                href="/privacy"
+                onClick={onClose}
+                className="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-left transition-colors hover:border-border hover:bg-bg-soft/60"
+              >
+                <ShieldIcon />
+                <span className="text-sm font-medium text-fg">
+                  Privacy Policy
+                </span>
+              </Link> */}
               <div className="mx-4 my-2 h-px bg-border" />
 
               <button
@@ -202,6 +231,17 @@ export function SideMenu({
               onClearAll={onClearAllSessions}
             />
           )}
+        </div>
+        {/* Footer */}
+        <div className="border-t border-border px-2 py-2">
+          <Link
+            href="/privacy"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-left transition-colors hover:border-border hover:bg-bg-soft/60"
+          >
+            <ShieldIcon />
+            <span className="text-sm font-medium text-fg">Privacy Policy</span>
+          </Link>
         </div>
       </aside>
     </>
@@ -316,6 +356,23 @@ function PlusIcon() {
     >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   );
 }

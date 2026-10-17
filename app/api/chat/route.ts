@@ -1,4 +1,6 @@
 import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { CHAT_MODEL } from "@/lib/ai";
 import { buildSystemPrompt, type ChatMode } from "@/lib/buildSystemPrompt";
 import { showContactForm } from "@/lib/contactTool";
@@ -15,7 +17,36 @@ import {
 
 export const maxDuration = 60;
 
+// Change to 999 when you want to remove the demo limit
+const DEMO_MESSAGE_LIMIT = 3;
+
 export async function POST(req: Request) {
+  // ------------------------------------------------------------
+  // 0. DEMO LIMIT CHECK
+  // ------------------------------------------------------------
+  const cookieStore = await cookies();
+  const demoUsage = parseInt(cookieStore.get("demo_usage")?.value || "0", 10);
+
+  if (demoUsage >= DEMO_MESSAGE_LIMIT) {
+    return NextResponse.json(
+      {
+        error:
+          "You have reached the 3-message limit for the demo. To unlock full access, unlimited conversations, and weekly reports, please contact myai.assistant30@gmail.com directly.",
+      },
+      { status: 403 },
+    );
+  }
+
+  // Increment cookie (valid for 24 hours)
+  cookieStore.set("demo_usage", (demoUsage + 1).toString(), {
+    maxAge: 60 * 60 * 24,
+    httpOnly: true,
+    path: "/",
+  });
+
+  // ------------------------------------------------------------
+  // 1. Parse Request
+  // ------------------------------------------------------------
   const {
     messages,
     mode = "default",
@@ -27,7 +58,7 @@ export async function POST(req: Request) {
   } = await req.json();
 
   // ------------------------------------------------------------
-  // 1. Latest user message
+  // 2. Latest user message
   // ------------------------------------------------------------
   const lastUserMessage = [...messages]
     .reverse()
@@ -41,18 +72,18 @@ export async function POST(req: Request) {
       .trim() ?? "";
 
   // ------------------------------------------------------------
-  // 2. Classify → decide what to run
+  // 3. Classify → decide what to run
   // ------------------------------------------------------------
   const category = classifyRequest(lastUserText);
   const needsRetrieval = shouldRetrieve(category);
   const depth = historyDepth(category);
 
   console.log(
-    `[chat] category=${category} retrieve=${needsRetrieval} depth=${depth}`,
+    `[chat] category=${category} retrieve=${needsRetrieval} depth=${depth} (demo_msg=${demoUsage + 1}/${DEMO_MESSAGE_LIMIT})`,
   );
 
   // ------------------------------------------------------------
-  // 3. Conditional retrieval
+  // 4. Conditional retrieval
   // ------------------------------------------------------------
   let retrievedContext = "";
 
@@ -73,18 +104,18 @@ export async function POST(req: Request) {
   }
 
   // ------------------------------------------------------------
-  // 4. Build prompt + tools
+  // 5. Build prompt + tools
   // ------------------------------------------------------------
   const systemPrompt = buildSystemPrompt(mode, retrievedContext);
   const reminderTools = buildReminderTools(visitorId);
 
   // ------------------------------------------------------------
-  // 5. Trim history — this fixes the answer-bleed problem
+  // 6. Trim history — fixes the answer-bleed problem
   // ------------------------------------------------------------
   const recentMessages = messages.slice(-depth);
 
   // ------------------------------------------------------------
-  // 6. Stream
+  // 7. Stream
   // ------------------------------------------------------------
   const result = streamText({
     model: CHAT_MODEL,
@@ -107,15 +138,9 @@ export async function POST(req: Request) {
   });
 
   // ------------------------------------------------------------
-  // 7. Log the conversation after the stream finishes
-  //    Fire-and-forget — don't block the response.
-  // ------------------------------------------------------------
-  // 7. Log the conversation after the stream finishes
-  //    Fire-and-forget — don't block the response.
+  // 8. Log the conversation after the stream finishes
   // ------------------------------------------------------------
   if (lastUserText && category !== "smallTalk") {
-    const currentMessages = [...recentMessages];
-
     Promise.resolve(result.text)
       .then((finalText) => {
         if (!finalText || typeof finalText !== "string") return;

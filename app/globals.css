@@ -381,3 +381,25 @@ body {
 .animate-slide-down {
   animation: slideDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+/* Add to globals.css */
+.prose h2 {
+  @apply mt-8 mb-4 font-serif text-xl font-semibold text-fg;
+}
+.prose h3 {
+  @apply mt-6 mb-3 text-lg font-medium text-fg;
+}
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+.prose ul {
+  @apply mb-4 list-disc space-y-2 pl-5 marker:text-accent;
+}
+.prose strong {
+  @apply font-semibold text-fg;
+}
+.prose code {
+  @apply rounded bg-bg-soft px-1.5 py-0.5 text-xs text-accent ring-1 ring-border;
+}
+.prose a {
+  @apply text-accent underline decoration-accent/30 underline-offset-2 transition-colors hover:decoration-accent;
+}
