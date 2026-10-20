@@ -73,7 +73,7 @@ export default function RootLayout({
         <ClientProviders />
 
         {/* Replace GTM-XXXXXXX with your actual Container ID */}
-        <GoogleTagManager gtmId="GTM-XXXXXXX" />
+        <GoogleTagManager gtmId="GTM-KKXPF9DH" />
       </body>
     </html>
   );
