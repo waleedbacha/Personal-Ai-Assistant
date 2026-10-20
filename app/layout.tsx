@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "@/components/ClientProviders";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -70,6 +71,9 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         <ClientProviders />
+
+        {/* Replace GTM-XXXXXXX with your actual Container ID */}
+        <GoogleTagManager gtmId="GTM-XXXXXXX" />
       </body>
     </html>
   );

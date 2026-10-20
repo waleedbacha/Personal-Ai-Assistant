@@ -215,7 +215,7 @@ You can reach Waleed through:
 
 • Portfolio — https://waleed-portfolio-theta.vercel.app/
 • LinkedIn — https://www.linkedin.com/in/waleed-badshah-93b260247/
-• Email — waleedbadshah@gmail.com
+• Email — waleedbadshah2003@gmail.com
 
 Or send him a message directly using the form below.
 

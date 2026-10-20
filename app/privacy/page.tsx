@@ -212,11 +212,11 @@ export default function PrivacyPolicy() {
           </p>
           <ul>
             <li>
-              <strong>Email:</strong> waleedbadshah2003@gmail.com
+              <strong>Email:</strong> myai.assistant3@gmail.com
             </li>
-            <li>
+            {/* <li>
               <strong>Portfolio:</strong> waleed-portfolio-theta.vercel.app
-            </li>
+            </li> */}
           </ul>
         </div>
       </div>

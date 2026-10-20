@@ -62,7 +62,7 @@ export function WelcomeModal() {
             Meet Your AI Assistant
           </h2>
           <p className="mt-2 text-sm text-muted">
-            Version 1.0 · Brought to you by WB © 2026
+            Version 1.0 · Powered by WB © 2026
           </p>
         </div>
 

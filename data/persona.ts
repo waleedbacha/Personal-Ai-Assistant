@@ -434,7 +434,7 @@ export const persona = {
   // CONTACT / LINKS
   // ============================================================
   contact: {
-    email: "waleedbadshah@gmail.com",
+    email: "waleedbadshah2003@gmail.com",
     linkedin: "https://www.linkedin.com/in/waleed-badshah-93b260247/",
     portfolio: "https://waleed-portfolio-theta.vercel.app/",
     github: "",
